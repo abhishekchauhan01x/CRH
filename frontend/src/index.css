@@ -1,0 +1,47 @@
+@theme{
+    --color-primary: #3f5261;
+    --color-secondary:#5F6FFF;
+    --grid-template-columns-auto: repeat(auto-fill, minmax(250px, 1fr));
+
+}
+@import "tailwindcss";
+
+* {
+    font-family: Outfit;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    scroll-behavior: smooth;
+}
+
+
+@layer utilities{
+    .primary{
+        background-color:#3f5261;
+    }
+    
+    /* Hide scrollbars */
+    .scrollbar-hide {
+        -ms-overflow-style: none;  /* Internet Explorer 10+ */
+        scrollbar-width: none;  /* Firefox */
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;  /* Safari and Chrome */
+    }
+}
+
+.active hr {
+    @apply block
+}
+
+@media (max-width:740px) {
+    .active p {
+        @apply text-white bg-primary
+    }
+}
+

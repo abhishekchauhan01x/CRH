@@ -1,0 +1,21 @@
+@theme{
+    --color-primary: #1D8BCC;
+    
+}
+@import "tailwindcss";
+
+::-webkit-scrollbar{
+    @apply hidden
+}
+
+*{
+    font-family: Outfit;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    scroll-behavior: smooth;
+}
