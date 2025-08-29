@@ -8,7 +8,7 @@ const DoctorContextProvider = (props) => {
 
     const backendUrl = "http://localhost:3000"
 
-    const [dToken, setDToken] = useState(localStorage.getItem('dToken') ? localStorage.getItem('dToken') : '')
+    const [dToken, setDToken] = useState(sessionStorage.getItem('dToken') ? sessionStorage.getItem('dToken') : '')
     const [appointments, setAppointments] = useState([])
     const [dashData, setDashData] = useState(false)
     const [profileData, setProfileData] = useState(false)

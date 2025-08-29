@@ -14,7 +14,7 @@ const Footer = () => {
                 </div>
 
                 {/* Center */}
-                <div>
+                {/* <div>
                     <p className="text-xl font-medium mb-5">COMPANY</p>
                     <ul className="flex flex-col gap-2 text-gray-600">
                         <li className="hover:text-[#1D8BCC] transition-colors cursor-pointer">Home</li>
@@ -22,7 +22,7 @@ const Footer = () => {
                         <li className="hover:text-[#1D8BCC] transition-colors cursor-pointer">Contact us</li>
                         <li className="hover:text-[#1D8BCC] transition-colors cursor-pointer">Privacy Policy</li>
                     </ul>
-                </div>
+                </div> */}
 
                 {/* Right Side */}
                 <div>

@@ -4,22 +4,29 @@ import jwt from 'jsonwebtoken'
 
 const authUser = async (req, res, next) => {
     try {
-
-        const  {token} = req.headers
+        console.log('🔐 authUser middleware called')
+        const {token} = req.headers
+        
         if (!token) {
-            return res.json({success:false,message:"Not Authorized Login again"})
+            console.log('❌ No token provided in headers')
+            return res.status(401).json({success: false, message: "Not Authorized Login again"})
         }
 
-        const token_decode = jwt.verify(token,process.env.JWT_SECRET)
+        console.log('🔍 Verifying token...')
+        const token_decode = jwt.verify(token, process.env.JWT_SECRET)
+        console.log('✅ Token verified, user ID:', token_decode.id)
 
         req.user = { id: token_decode.id }
-
         next()
 
-
     } catch (error) {
-        console.log(error)
-        res.json({ success: false, message: error.message })
+        console.log('❌ Token verification failed:', error.message)
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ success: false, message: "Token expired, please login again" })
+        } else if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ success: false, message: "Invalid token, please login again" })
+        }
+        res.status(500).json({ success: false, message: error.message })
     }
 }
 

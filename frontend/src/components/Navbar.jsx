@@ -45,28 +45,12 @@ const Navbar = () => {
                     <li className="py-1">HOME</li>
                     <hr className='border-none outline-none h-0.5 bg-[#5F6FFF] w-3/5 m-auto hidden' />
                 </NavLink>
-                {/* <NavLink to="/doctors"
+                <NavLink to="/doctors"
                     className={({ isActive }) =>
                         isActive ? 'border-b-2 border-[#1D8BCC] text-[#1D8BCC]' : 'hover:text-[#1D8BCC] transition-colors'
                     }
                 >
                     <li className="py-1">ALL DOCTORS</li>
-                    <hr className='border-none outline-none h-0.5 bg-[#1D8BCC] w-3/5 m-auto hidden' />
-                </NavLink> */}
-                <NavLink to="/about"
-                    className={({ isActive }) =>
-                        isActive ? 'border-b-2 border-[#1D8BCC] text-[#1D8BCC]' : 'hover:text-[#1D8BCC] transition-colors'
-                    }
-                >
-                    <li className="py-1">ABOUT</li>
-                    <hr className='border-none outline-none h-0.5 bg-[#1D8BCC] w-3/5 m-auto hidden' />
-                </NavLink>
-                <NavLink to="/contact"
-                    className={({ isActive }) =>
-                        isActive ? 'border-b-2 border-[#1D8BCC] text-[#1D8BCC]' : 'hover:text-[#1D8BCC] transition-colors'
-                    }
-                >
-                    <li className="py-1">CONTACT</li>
                     <hr className='border-none outline-none h-0.5 bg-[#1D8BCC] w-3/5 m-auto hidden' />
                 </NavLink>
             </ul>
@@ -89,10 +73,7 @@ const Navbar = () => {
                             </div>
                         </div>
                         : <div className="flex items-center gap-3">
-                            <button onClick={() => navigate('/doctor-login')} className="bg-[#5F6FFF] text-white px-6 py-3 rounded-full font-light cursor-pointer hover:scale-105 transition-transform">
-                                Doctor Login
-                            </button>
-                            <button onClick={() => navigate('/login')} className="bg-[#1D8BCC] text-white px-8 py-3 rounded-full font-light cursor-pointer hover:scale-105 transition-transform">
+                            <button onClick={() => navigate('/login')} className="primary text-white px-8 py-3 rounded-full font-light cursor-pointer hover:scale-105 transition-transform">
                                 Create Account
                             </button>
                         </div>
@@ -110,8 +91,6 @@ const Navbar = () => {
                     <ul className='flex flex-col items-center gap-2  mt-5 px-5 text-lg font-medium'>
                         <NavLink onClick={() => setShowMenu(false)} to='/'><p className='px-4 py-2 rounded inline-block'>HOME</p></NavLink>
                         <NavLink onClick={() => setShowMenu(false)} to='/doctors'><p className='px-4 py-2 rounded inline-block'>ALL DOCTORS</p></NavLink>
-                        <NavLink onClick={() => setShowMenu(false)} to='/about'><p className='px-4 py-2 rounded inline-block'>ABOUT</p></NavLink>
-                        <NavLink onClick={() => setShowMenu(false)} to='/contact'><p className='px-4 py-2 rounded inline-block'>CONTACT</p></NavLink>
                     </ul>
                 </div>
             </div>

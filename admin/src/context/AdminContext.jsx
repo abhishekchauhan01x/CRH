@@ -8,7 +8,7 @@ export const AdminContext = createContext()
 
 const AdminContextProvider = (props) => {
 
-    const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStorage.getItem('aToken') : '')
+    const [aToken, setAToken] = useState(sessionStorage.getItem('aToken') ? sessionStorage.getItem('aToken') : '')
     const [doctors, setDoctors] = useState([])
     const [appointments, setAppointments] = useState([])
     const [patients, setPatients] = useState([])
@@ -25,6 +25,20 @@ const AdminContextProvider = (props) => {
             if (data.success) {
                 setDoctors(data.doctors)
                 console.log(data.doctors)
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
+    }
+
+    const deleteDoctor = async (doctorId) => {
+        try {
+            const { data } = await axios.post(backendUrl + '/api/admin/delete-doctor', { doctorId }, { headers: { aToken } })
+            if (data.success) {
+                toast.success(data.message)
+                await getAllDoctors()
             } else {
                 toast.error(data.message)
             }
@@ -64,6 +78,50 @@ const AdminContextProvider = (props) => {
         } catch (error) {
             toast.error(error.message)
 
+        }
+    }
+
+    const deleteAppointment = async (appointmentId) => {
+        try {
+            const { data } = await axios.post(backendUrl + '/api/admin/delete-appointment', { appointmentId }, { headers: { aToken } })
+            if (data.success) {
+                toast.success('Appointment deleted')
+                await getAllAppointments()
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
+    }
+
+    const deleteDocument = async (appointmentId, documentId) => {
+        try {
+            const { data } = await axios.delete(backendUrl + `/api/admin/appointments/${appointmentId}/documents/${documentId}`, { headers: { aToken } })
+            if (data.success) {
+                toast.success('Document deleted successfully')
+                await getAllAppointments() // Refresh appointments to update the UI
+                return true
+            } else {
+                toast.error(data.message)
+                return false
+            }
+        } catch (error) {
+            toast.error(error.message || 'Failed to delete document')
+            return false
+        }
+    }
+
+    const cleanupDoctorGoogleItems = async (doctorId) => {
+        try {
+            const { data } = await axios.post(backendUrl + '/api/admin/cleanup-doctor-google', { doctorId }, { headers: { aToken } })
+            if (data.success) {
+                toast.success(data.message || 'Google items cleaned')
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
         }
     }
 
@@ -128,6 +186,20 @@ const AdminContextProvider = (props) => {
         }
     }
 
+    const deletePatient = async (userId) => {
+        try {
+            const { data } = await axios.post(backendUrl + '/api/admin/delete-patient', { userId }, { headers: { aToken } })
+            if (data.success) {
+                toast.success(data.message)
+                await getAllPatients()
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
+    }
+
     const updateDoctorSchedule = async (doctorId, schedule) => {
         try {
             const { data } = await axios.post(
@@ -168,10 +240,26 @@ const AdminContextProvider = (props) => {
 
     const updateDoctorProfile = async (doctorId, updates) => {
         try {
+            // If updates contains a File (image), send as FormData; else JSON
+            const hasFile = updates && updates.image instanceof File
+            let config = { headers: { aToken } }
+            let payload
+            if (hasFile) {
+                const form = new FormData()
+                form.append('doctorId', doctorId)
+                const { image, ...rest } = updates
+                form.append('updates', JSON.stringify(rest))
+                form.append('image', image)
+                payload = form
+                config.headers['Content-Type'] = 'multipart/form-data'
+            } else {
+                payload = { doctorId, updates }
+            }
+
             const { data } = await axios.post(
                 backendUrl + '/api/admin/update-doctor-profile',
-                { doctorId, updates },
-                { headers: { aToken } }
+                payload,
+                config
             )
             if (data.success) {
                 toast.success(data.message)
@@ -214,13 +302,17 @@ const AdminContextProvider = (props) => {
         backendUrl, doctors,
         getAllDoctors, changeAvailability,
         appointments, setAppointments,
-        getAllAppointments,cancelAppointment,completeAppointment,
+        getAllAppointments,cancelAppointment,completeAppointment, deleteAppointment,
         patients, getAllPatients,
         dashData,getDashData,
         updateDoctorSchedule,
         getDoctorDetails,
         updateDoctorProfile,
-        resetDoctorPassword
+        resetDoctorPassword,
+        deleteDoctor,
+        deletePatient,
+        cleanupDoctorGoogleItems,
+        deleteDocument
 
     }
 

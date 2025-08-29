@@ -1,13 +1,8 @@
-# MediSync
+# CRHEMD
 
-🩺 **MediSync** – Your trusted platform for booking appointments with top doctors and managing healthcare efficiently.
+🩺 **CRHEMD** – Your trusted platform for booking appointments with top doctors and managing healthcare efficiently.
 
 ---
-
-## 🚀 Live Demo
-
-- **User Portal:** [https://medi-sync-dusky.vercel.app/](https://medi-sync-dusky.vercel.app/)
-- **Admin Portal:** [https://medisync-admin-mu.vercel.app/](https://medisync-admin-mu.vercel.app/)
 
 ---
 
@@ -70,12 +65,6 @@
 3. Start backend and frontend/admin apps as needed
 
 ---
-
-## 📢 Useful Links
-
-- **User Portal:** [https://medi-sync-dusky.vercel.app/](https://medi-sync-dusky.vercel.app/)
-- **Admin Portal:** [https://medisync-admin-mu.vercel.app/](https://medisync-admin-mu.vercel.app/)
-
 ---
 
 ## 🤝 Contributing
@@ -90,4 +79,4 @@ This project is licensed under the MIT License.
 
 ---
 
-Enjoy using MediSync! 🩺✨
+Enjoy using CRHEMD! 🩺✨

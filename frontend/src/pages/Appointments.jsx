@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { assets } from '../assets/assets';
 import RelatedDoctors from '../components/RelatedDoctors';
@@ -17,6 +17,9 @@ const Appointments = () => {
     // Past time slots are automatically hidden (not visible)
 
     const navigate = useNavigate()
+    const location = useLocation()
+    const searchParams = new URLSearchParams(location.search)
+    const rescheduleId = searchParams.get('rescheduleId') || ''
 
     const [docInfo, setDocInfo] = useState(null);
     const [docSlots, setDocSlots] = useState([]);
@@ -24,6 +27,16 @@ const Appointments = () => {
     const [slotTime, setSlotTime] = useState('');
     const [currentTime, setCurrentTime] = useState(new Date());
     const [userAppointments, setUserAppointments] = useState([]);
+
+    // Open WhatsApp chat with a predefined message to this doctor's number
+    const openWhatsApp = () => {
+        try {
+            const phone = String(docInfo?.whatsapp || '919555664040') // E.164 without +
+            // const msg = `Hello  ${docInfo?.name || ''}, I would like to inquire about an appointment.`
+            const url = `https://wa.me/${phone}`
+            window.open(url, '_blank')
+        } catch (_) {}
+    }
 
     const fetchDocInfo = async () => {
         const docInfo = doctors.find((doc) => doc._id === docId);
@@ -44,6 +57,23 @@ const Appointments = () => {
         }
     };
 
+    // Normalize a time string to comparable key: HH:MM in 24h
+    const normalizeTimeKey = (timeStr) => {
+        try {
+            if (!timeStr || typeof timeStr !== 'string') return ''
+            const m = timeStr.trim().match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i)
+            if (!m) return timeStr.trim().toLowerCase()
+            let h = parseInt(m[1], 10)
+            const min = parseInt(m[2], 10)
+            const per = (m[3] || '').toUpperCase()
+            if (per === 'PM' && h !== 12) h += 12
+            if (per === 'AM' && h === 12) h = 0
+            const hh = String(h).padStart(2, '0')
+            const mm = String(min).padStart(2, '0')
+            return `${hh}:${mm}`
+        } catch { return String(timeStr || '').trim().toLowerCase() }
+    }
+
     // Helper function to check if a time slot is already booked by the user
     const isTimeSlotBooked = (dateTime, time) => {
         if (!dateTime || !time) return false;
@@ -51,9 +81,12 @@ const Appointments = () => {
         const month = dateTime.getMonth() + 1;
         const year = dateTime.getFullYear();
         const dateString = day + "_" + month + "_" + year;
-        return userAppointments.some(apt => 
-            apt.slotDate === dateString && apt.slotTime === time && !apt.cancelled
-        );
+        const targetKey = normalizeTimeKey(time)
+        return userAppointments.some(apt => {
+            if (apt.cancelled || apt.isCompleted) return false
+            if (apt.slotDate !== dateString) return false
+            return normalizeTimeKey(apt.slotTime) === targetKey
+        });
     };
 
     const getAvailableSlots = async () => {
@@ -63,15 +96,15 @@ const Appointments = () => {
         let today = new Date()
         const now = new Date()
 
-        // Get doctor's schedule
+        // Get doctor's schedule (supports two sessions per day)
         const doctorSchedule = docInfo?.schedule || {
-            monday: { available: true, startTime: "09:00", endTime: "17:00" },
-            tuesday: { available: true, startTime: "09:00", endTime: "17:00" },
-            wednesday: { available: true, startTime: "09:00", endTime: "17:00" },
-            thursday: { available: true, startTime: "09:00", endTime: "17:00" },
-            friday: { available: true, startTime: "09:00", endTime: "17:00" },
-            saturday: { available: true, startTime: "09:00", endTime: "17:00" },
-            sunday: { available: false, startTime: "09:00", endTime: "17:00" }
+            monday: { available: true, startTime: "09:00", endTime: "13:00", hasSecondSession: true, secondStartTime: "17:00", secondEndTime: "19:00" },
+            tuesday: { available: true, startTime: "09:00", endTime: "13:00", hasSecondSession: true, secondStartTime: "17:00", secondEndTime: "19:00" },
+            wednesday: { available: true, startTime: "09:00", endTime: "13:00", hasSecondSession: true, secondStartTime: "17:00", secondEndTime: "19:00" },
+            thursday: { available: true, startTime: "09:00", endTime: "13:00", hasSecondSession: true, secondStartTime: "17:00", secondEndTime: "19:00" },
+            friday: { available: true, startTime: "09:00", endTime: "13:00", hasSecondSession: true, secondStartTime: "17:00", secondEndTime: "19:00" },
+            saturday: { available: true, startTime: "09:00", endTime: "13:00", hasSecondSession: true, secondStartTime: "17:00", secondEndTime: "19:00" },
+            sunday: { available: false, startTime: "09:00", endTime: "13:00", hasSecondSession: false, secondStartTime: "17:00", secondEndTime: "19:00" }
         }
 
         const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
@@ -90,53 +123,58 @@ const Appointments = () => {
 
             // Check if doctor is available on this day
             if (daySchedule && daySchedule.available) {
-                // Parse start and end times
-                const [startHour, startMinute] = daySchedule.startTime.split(':').map(Number)
-                const [endHour, endMinute] = daySchedule.endTime.split(':').map(Number)
+                const sessions = []
+                const morningStart = String(daySchedule.startTime || '09:00')
+                const morningEnd = String(daySchedule.endTime || '13:00')
+                sessions.push({ start: morningStart, end: morningEnd })
+                if (daySchedule.hasSecondSession) {
+                    const eveningStart = String(daySchedule.secondStartTime || '17:00')
+                    const eveningEnd = String(daySchedule.secondEndTime || '19:00')
+                    sessions.push({ start: eveningStart, end: eveningEnd })
+                }
 
-                let startTime = new Date(currentDate)
-                startTime.setHours(startHour, startMinute, 0, 0)
-                
-                let endTime = new Date(currentDate)
-                endTime.setHours(endHour, endMinute, 0, 0)
+                const generateSessionSlots = (sessionStartStr, sessionEndStr) => {
+                    const [sH, sM] = sessionStartStr.split(':').map(Number)
+                    const [eH, eM] = sessionEndStr.split(':').map(Number)
+                    let sessionStart = new Date(currentDate)
+                    sessionStart.setHours(sH, sM, 0, 0)
+                    let sessionEnd = new Date(currentDate)
+                    sessionEnd.setHours(eH, eM, 0, 0)
 
-                // For today, adjust start time if current time is past the scheduled start time
-                if (today.getDate() === currentDate.getDate()) {
-                    if (now > startTime) {
-                        startTime = new Date(now)
-                        startTime.setMinutes(Math.ceil(startTime.getMinutes() / 10) * 10)
-                        startTime.setSeconds(0, 0)
-                        
-                        // If current time is past end time, don't show any slots
-                        if (now >= endTime) {
-                            startTime = new Date(endTime)
+                    if (today.toDateString() === currentDate.toDateString() && now > sessionStart) {
+                        sessionStart = new Date(now)
+                        sessionStart.setMinutes(Math.ceil(sessionStart.getMinutes() / 10) * 10)
+                        sessionStart.setSeconds(0, 0)
+                        if (now >= sessionEnd) {
+                            sessionStart = new Date(sessionEnd)
                         }
+                    }
+
+                    let currentSlot = new Date(sessionStart)
+                    while (currentSlot < sessionEnd) {
+                        let formattedTime = currentSlot.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+
+                        let day = currentSlot.getDate()
+                        let month = currentSlot.getMonth() + 1
+                        let year = currentSlot.getFullYear()
+
+                        const slotDate = day + "_" + month + "_" + year
+                        const slotTime = formattedTime
+
+                        const bookedTimes = docInfo?.slots_booked?.[slotDate] || []
+                        const isSlotBookedByOthers = bookedTimes.some(t => normalizeTimeKey(t) === normalizeTimeKey(slotTime))
+
+                        timeSlots.push({
+                            datetime: new Date(currentSlot),
+                            time: formattedTime,
+                            isBookedByOthers: isSlotBookedByOthers
+                        })
+
+                        currentSlot.setMinutes(currentSlot.getMinutes() + 10)
                     }
                 }
 
-                // Generate time slots
-                let currentSlot = new Date(startTime)
-                while (currentSlot < endTime) {
-                    let formattedTime = currentSlot.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-
-                    let day = currentSlot.getDate()
-                    let month = currentSlot.getMonth() + 1
-                    let year = currentSlot.getFullYear()
-
-                    const slotDate = day + "_" + month + "_" + year
-                    const slotTime = formattedTime
-
-                    const isSlotBookedByOthers = docInfo?.slots_booked?.[slotDate]?.includes(slotTime) || false;
-
-                    timeSlots.push({
-                        datetime: new Date(currentSlot),
-                        time: formattedTime,
-                        isBookedByOthers: isSlotBookedByOthers
-                    })
-
-                    // Add 10 minutes
-                    currentSlot.setMinutes(currentSlot.getMinutes() + 10)
-                }
+                sessions.forEach(s => generateSessionSlots(s.start, s.end))
             }
 
             setDocSlots((prev) => [...prev, timeSlots])
@@ -164,9 +202,20 @@ const Appointments = () => {
             const slotDate = day + "_" + month + "_" + year
             console.log(slotDate);
 
-            // Frontend validation: Check for existing appointments on the same date and time
-            const existingAppointment = userAppointments.find(apt => 
-                apt.slotDate === slotDate && apt.slotTime === slotTime && !apt.cancelled
+            // Re-fetch latest user appointments to avoid stale state before validating
+            let latestUserAppointments = userAppointments
+            try {
+                const latest = await axios.get(backendUrl + '/api/user/appointments', { headers: { token } })
+                if (latest?.data?.success && Array.isArray(latest.data.appointments)) {
+                    latestUserAppointments = latest.data.appointments
+                    setUserAppointments(latest.data.appointments)
+                }
+            } catch (_) {}
+
+            // Frontend validation (format-insensitive). Show toast only for active (not cancelled, not completed) conflicts
+            const targetKey = normalizeTimeKey(slotTime)
+            const existingAppointment = latestUserAppointments.find(apt => 
+                apt.slotDate === slotDate && !apt.cancelled && !apt.isCompleted && normalizeTimeKey(apt.slotTime) === targetKey
             );
 
             if (existingAppointment) {
@@ -174,16 +223,24 @@ const Appointments = () => {
                 return;
             }
 
-            // Frontend validation: Check if slot is already booked by other users
-            const isSlotBookedByOthers = docInfo?.slots_booked?.[slotDate]?.includes(slotTime) || false;
+            // Frontend validation: Check if slot is already booked by other users (format-insensitive)
+            const bookedTimes = docInfo?.slots_booked?.[slotDate] || []
+            const isSlotBookedByOthers = bookedTimes.some(t => normalizeTimeKey(t) === normalizeTimeKey(slotTime))
             if (isSlotBookedByOthers) {
                 toast.error('This time slot is already booked by another user. Please choose a different time slot.');
                 return;
             }
 
-            const { data } = await axios.post(backendUrl + '/api/user/book-appointment', { docId, slotDate, slotTime }, { headers: { token } })
+            let data
+            if (rescheduleId) {
+                const resp = await axios.post(backendUrl + '/api/user/reschedule-appointment', { appointmentId: rescheduleId, slotDate, slotTime }, { headers: { token } })
+                data = resp.data
+            } else {
+                const resp = await axios.post(backendUrl + '/api/user/book-appointment', { docId, slotDate, slotTime }, { headers: { token } })
+                data = resp.data
+            }
             if (data.success) {
-                toast.success(data.message)
+                toast.success(rescheduleId ? 'Appointment rescheduled' : data.message)
                 getDoctorsData()
                 fetchUserAppointments() // Refresh user appointments
                 navigate('/my-appointment')
@@ -199,6 +256,17 @@ const Appointments = () => {
     useEffect(() => {
         fetchDocInfo();
     }, [doctors, docId]);
+
+    // Ensure we always have the latest doctor data (including freed slots after admin deletes)
+    useEffect(() => {
+        // Refresh doctors list on mount/when doc changes
+        getDoctorsData();
+        // Lightweight periodic refresh while on this page to reflect admin-side changes
+        const interval = setInterval(() => {
+            getDoctorsData();
+        }, 60000); // 1 minute
+        return () => clearInterval(interval);
+    }, [docId]);
 
     useEffect(() => {
         fetchUserAppointments();
@@ -234,17 +302,30 @@ const Appointments = () => {
                     </div>
 
                     <div className="flex-1 border border-gray-400 rounded-lg p-8 py-7 bg-white mx-2 sm:mx-0 mt-[-80px]  sm:mt-0">
-                        <p className="flex items-center gap-2 text-2xl font-medium text-gray-900">
-                            {docInfo.name}
-                            <img className="w-5" src={assets.verified_icon} alt="Verified" />
-                        </p>
-                        <div className="flex items-center gap-2 text-sm mt-1 text-gray-600">
-                            <p>
-                                {docInfo.degree} - {docInfo.speciality}
-                            </p>
-                            <button className="py-0.5 px-2 border text-xs rounded-full">
-                                {docInfo.experience}
-                            </button>
+                        <div className="flex items-center justify-between gap-4">
+                            <div>
+                                <p className="flex items-center gap-2 text-2xl font-medium text-gray-900">
+                                    {docInfo.name}
+                                    <img className="w-5" src={assets.verified_icon} alt="Verified" />
+                                </p>
+                                <div className="flex items-center gap-2 text-sm mt-1 text-gray-600">
+                                    <p>
+                                        {docInfo.degree} - {docInfo.speciality}
+                                    </p>
+                                    <button className="py-0.5 px-2 border text-xs rounded-full">
+                                        {docInfo.experience}
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="shrink-0">
+                                <button
+                                    onClick={openWhatsApp}
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded border border-emerald-500 text-emerald-600 hover:bg-emerald-50 text-sm"
+                                    title="Chat on WhatsApp"
+                                >
+                                    Chat on WhatsApp
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <p className="flex items-center gap-1 text-sm font-medium text-gray-900 mt-3">

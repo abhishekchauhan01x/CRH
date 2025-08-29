@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-// import Doctors from './pages/Doctors'
+import Doctors from './pages/Doctors'
 import Login from './pages/Login'
 import DoctorLogin from './pages/DoctorLogin'
 import DoctorDashboard from './pages/DoctorDashboard'
@@ -27,8 +27,8 @@ const App = () => {
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/topdoctors' element={<TopDoctors />} />
-          {/* <Route path='/doctors' element={<Doctors />} /> */}
-          {/* <Route path='/doctors/:speciality' element={<Doctors />} /> */}
+          <Route path='/doctors' element={<Doctors />} />
+          <Route path='/doctors/:speciality' element={<Doctors />} />
           <Route path='/login' element={<Login />} />
           <Route path='/doctor-login' element={<DoctorLogin />} />
           <Route path='/doctor-dashboard' element={<DoctorDashboard />} />
