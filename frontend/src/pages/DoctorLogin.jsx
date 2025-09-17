@@ -10,6 +10,7 @@ const DoctorLogin = () => {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Check if doctor is already logged in
@@ -95,15 +96,20 @@ const DoctorLogin = () => {
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
-              placeholder="Enter your password"
-              required
-            />
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+                placeholder="Enter your password"
+                required
+              />
+              <button type="button" onClick={()=>setShowPassword(prev=>!prev)} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-200">
+                {showPassword ? '👁️‍🗨️' : '👁️'}
+              </button>
+            </div>
           </div>
 
           <button

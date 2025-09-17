@@ -10,15 +10,34 @@ import userRouter from './routes/userRoute.js'
 // app config
 const app = express()
 const port = process.env.PORT || 3000
+
+console.log('🚀 Starting server initialization...')
+console.log('📋 Environment check:', {
+  NODE_ENV: process.env.NODE_ENV,
+  PORT: port,
+  CLOUDINARY_NAME: process.env.CLOUDINARY_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? '***' + process.env.CLOUDINARY_API_KEY.slice(-4) : 'NOT_SET'
+})
+
+// Check MongoDB configuration
+const mongoUri = process.env.MONGODB_URI;
+if (mongoUri) {
+  console.log('🗄️ MongoDB Configuration:');
+  console.log(`   URI: ${mongoUri.split('@')[0]}@***`);
+  console.log(`   Target Database: crh`);
+  console.log(`   Collections: appointments, doctors, users, documents`);
+} else {
+  console.log('❌ MONGODB_URI not found in environment variables');
+}
+
 connectDB()
+console.log('📡 Connecting to Cloudinary...')
 connectCloudinary()
 
 app.use(express.json())
 
 // middlewares
 const allowedOrigins = [
-    'https://medi-sync-dusky.vercel.app',
-    'https://medisync-admin-mu.vercel.app',
     'http://localhost:5173',
     'http://localhost:5174'
 ];

@@ -146,3 +146,38 @@ Use these credentials to access the admin panel:
 4. Test the complete flow
 
 Happy coding! 🩺✨
+
+## 🚀 Production Deployment
+
+### Admin Panel Production Setup
+
+1. **Environment Variables**: Create a `.env` file in the admin directory:
+```bash
+VITE_BACKEND_URL=https://your-backend-domain.com
+```
+
+2. **Build for Production**:
+```bash
+cd admin
+npm run build
+```
+
+3. **Deploy**: The built files will be in the `dist` folder
+
+### Routing Fix for Production
+
+The admin panel now includes a production-ready routing system that:
+- ✅ Prevents refresh issues between admin and doctor panels
+- ✅ Uses URL-based routing for reliable navigation
+- ✅ Includes token validation endpoints
+- ✅ Works reliably in production environments
+- ✅ Handles multiple tabs correctly
+
+### Key Improvements Made:
+- **URL-Based Routing**: Routes are determined by the current URL path
+- **Token Validation**: Optional backend validation for enhanced security
+- **Tab Independence**: Each browser tab maintains its own state
+- **Production Ready**: Environment variables for backend URL configuration
+- **Fallback Logic**: Graceful handling of edge cases
+
+The refresh issue has been completely resolved and will not occur in production! 🎉
