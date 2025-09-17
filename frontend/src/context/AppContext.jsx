@@ -9,7 +9,7 @@ export const AppContext = createContext()
 const AppContextProvider = (props) => {
 
     const currenySymbol = '₹'
-    const backendUrl = "https://crh-2.onrender.com"
+    const backendUrl = "https://api.crhemd.com/"
 
     const [doctors, setDoctors] = useState([])
     const [token, setToken] = useState(() => {
