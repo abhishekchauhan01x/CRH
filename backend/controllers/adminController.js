@@ -846,7 +846,14 @@ export const cleanupDoctorGoogle = async (req, res) => {
 // Admin API: update doctor profile details (including password and email)
 const updateDoctorProfileAdmin = async (req, res) => {
     try {
-        const { doctorId, updates } = req.body
+        const { doctorId } = req.body
+        let updates
+        // When multipart, non-file fields arrive as strings; support both JSON body and form-data
+        try {
+            updates = typeof req.body.updates === 'string' ? JSON.parse(req.body.updates) : (req.body.updates || {})
+        } catch (_) {
+            updates = req.body.updates || {}
+        }
 
         if (!doctorId || !updates || typeof updates !== 'object') {
             return res.json({ success: false, message: 'Doctor ID and updates are required' })
@@ -868,6 +875,18 @@ const updateDoctorProfileAdmin = async (req, res) => {
             if (key in updates) safeUpdates[key] = updates[key]
         }
 
+        // If an image file is attached, upload to Cloudinary and set image URL
+        if (req.file) {
+            try {
+                const uploadRes = await cloudinary.uploader.upload(req.file.path, { resource_type: 'image' })
+                if (uploadRes?.secure_url) {
+                    safeUpdates.image = uploadRes.secure_url
+                }
+            } catch (e) {
+                console.log('Image upload failed:', e?.message || e)
+            }
+        }
+
         // Handle password update if provided
         if (updates.password && updates.password.trim()) {
             const cleanPassword = updates.password.trim()
@@ -881,7 +900,6 @@ const updateDoctorProfileAdmin = async (req, res) => {
             safeUpdates.password = hashedPassword
             safeUpdates.originalPassword = cleanPassword // Store original password for admin viewing
         }
-
         // Update the doctor profile
         const updated = await doctorModel.findByIdAndUpdate(
             doctorId, 

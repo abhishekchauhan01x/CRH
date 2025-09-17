@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react'
+import React, { useContext, useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { AdminContext } from '../../context/AdminContext'
 import { assets } from '../../assets/assets'
@@ -41,13 +41,6 @@ const AdminDoctorProfile = () => {
   const [passwordUpdateTrigger, setPasswordUpdateTrigger] = useState(0)
   const [currentPassword, setCurrentPassword] = useState('')
   const [forceUpdate, setForceUpdate] = useState(0)
-  const [currentTime, setCurrentTime] = useState(new Date())
-
-  // Keep current time fresh for real-time date displays
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000)
-    return () => clearInterval(timer)
-  }, [])
 
   // Reflect URL route in modal visibility so refresh preserves state
   const isScheduleRoute = location.pathname.endsWith('/schedule')
@@ -147,7 +140,7 @@ const AdminDoctorProfile = () => {
     setSchedule(prev => ({ ...prev, [day]: { ...prev[day], [field]: value } }))
   }
 
-  const getDayName = (day) => day.charAt(0).toUpperCase() + day.slice(1)
+  // const getDayName = (day) => day.charAt(0).toUpperCase() + day.slice(1)
 
   const getNextOccurrenceDate = (dayName) => {
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
@@ -195,6 +188,8 @@ const AdminDoctorProfile = () => {
       available: doctor.available !== undefined ? doctor.available : true,
       password: ''
     })
+    setEditImageFile(null)
+    setEditImagePreview(doctor.image || null)
     setTempPassword('')
     setShowEditModal(true)
   }
@@ -205,53 +200,18 @@ const AdminDoctorProfile = () => {
   }
 
   const submitEdit = async () => {
-    try {
-      // Check if email is being changed
-      const isEmailChanging = editForm.email !== doctor.email
-      
-      const updates = {
-        name: editForm.name,
-        email: editForm.email,
-        speciality: editForm.speciality,
-        degree: editForm.degree,
-        experience: editForm.experience,
-        fees: Number(editForm.fees) || 0,
-        about: editForm.about,
-        address: { line1: editForm.address1, line2: editForm.address2 },
-        available: editForm.available
-      }
-      
-      // Handle password update if provided
-      if (editForm.password && editForm.password.trim()) {
-        updates.password = editForm.password.trim()
-      }
-      
-      const updated = await updateDoctorProfile(doctorId, updates)
-      if (updated) {
-        setDoctor(updated)
-        setShowEditModal(false)
-        
-        // Show appropriate message based on what was updated
-        let message = 'Doctor details updated successfully!'
-        if (isEmailChanging) {
-          message += ' Email has been updated and the doctor can now log in with the new email address.'
-        }
-        if (editForm.password && editForm.password.trim()) {
-          message += ' Password has been updated and the doctor can now log in with the new password.'
-        }
-        message += ' All changes have been synchronized across the system.'
-        
-        toast.success(message)
-        
-        // Refresh all data to ensure synchronization across panels
-        await Promise.all([
-          getAllDoctors(),
-          getAllAppointments()
-        ])
-      }
-    } catch (error) {
-      console.error('Error updating doctor:', error)
-      toast.error('Failed to update doctor details. Please try again.')
+    const updates = {
+      speciality: editForm.speciality,
+      degree: editForm.degree,
+      experience: editForm.experience,
+      fees: Number(editForm.fees) || 0,
+      about: editForm.about,
+      address: { line1: editForm.address1, line2: editForm.address2 }
+    }
+    const updated = await updateDoctorProfile(doctorId, updates)
+    if (updated) {
+      setDoctor(updated)
+      setShowEditModal(false)
     }
   }
 
@@ -599,7 +559,7 @@ const AdminDoctorProfile = () => {
                       const currentMonth = today.getMonth()
                       const currentYear = today.getFullYear()
                       const firstDay = new Date(currentYear, currentMonth, 1)
-                      const lastDay = new Date(currentYear, currentMonth + 1, 0)
+                      // const lastDay = new Date(currentYear, currentMonth + 1, 0)
                       const startDate = new Date(firstDay)
                       startDate.setDate(startDate.getDate() - firstDay.getDay())
                       
@@ -745,39 +705,6 @@ const AdminDoctorProfile = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Doctor Name */}
-              <div>
-                <label className="block text-sm text-gray-700 mb-1">Doctor Name *</label>
-                <input 
-                  name="name" 
-                  value={editForm.name} 
-                  onChange={handleEditChange} 
-                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary" 
-                  placeholder="Enter doctor name" 
-                  required
-                />
-              </div>
-              
-              {/* Email */}
-              <div>
-                <label className="block text-sm text-gray-700 mb-1">Email *</label>
-                <input 
-                  name="email" 
-                  type="email" 
-                  value={editForm.email} 
-                  onChange={handleEditChange} 
-                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary" 
-                  placeholder="Enter email address" 
-                  required
-                  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                  title="Please enter a valid email address"
-                />
-                {editForm.email !== doctor.email && (
-                  <p className="text-xs text-amber-600 mt-1">⚠️ Changing email will update login credentials</p>
-                )}
-              </div>
-              
-              {/* Speciality */}
               <div>
                 <label className="block text-sm text-gray-700 mb-1">Speciality</label>
                 <input 

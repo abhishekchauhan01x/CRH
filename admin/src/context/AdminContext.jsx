@@ -240,10 +240,26 @@ const AdminContextProvider = (props) => {
 
     const updateDoctorProfile = async (doctorId, updates) => {
         try {
+            // If updates contains a File (image), send as FormData; else JSON
+            const hasFile = updates && updates.image instanceof File
+            let config = { headers: { aToken } }
+            let payload
+            if (hasFile) {
+                const form = new FormData()
+                form.append('doctorId', doctorId)
+                const { image, ...rest } = updates
+                form.append('updates', JSON.stringify(rest))
+                form.append('image', image)
+                payload = form
+                config.headers['Content-Type'] = 'multipart/form-data'
+            } else {
+                payload = { doctorId, updates }
+            }
+
             const { data } = await axios.post(
                 backendUrl + '/api/admin/update-doctor-profile',
-                { doctorId, updates },
-                { headers: { aToken } }
+                payload,
+                config
             )
             if (data.success) {
                 toast.success(data.message)

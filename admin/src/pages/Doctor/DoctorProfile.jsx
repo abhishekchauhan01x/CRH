@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { DoctorContext } from '../../context/DoctorContext'
 import { AppContext } from '../../context/AppContext'
 import axios from 'axios'
@@ -19,6 +19,8 @@ const DoctorProfile = () => {
   const [tempPassword, setTempPassword] = useState('')
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
+  const fileInputRef = useRef(null)
+  const fileInputRef = useRef(null)
   
 
   const updateProfile = async () => {
@@ -81,8 +83,12 @@ const DoctorProfile = () => {
   const syncGoogleCalendar = async () => {
     try {
       const { data } = await axios.post(`${backendUrl}/api/doctor/google/sync`, {}, { headers: { dToken } })
-      if (data.success) toast.success('Synced to Google Calendar')
-      else toast.error(data.message || 'Sync failed')
+      if (data.success) {
+        toast.success('Appointments synced')
+      } else {
+        toast.error(data.message || 'Sync failed')
+      }
+      
     } catch (e) {
       toast.error(e.message)
     }
@@ -148,19 +154,8 @@ const DoctorProfile = () => {
     return () => clearInterval(timer)
   }, [])
 
-  // Helpers to compute next occurrence date for each weekday and format header text
-  const getNextOccurrenceDate = (dayName) => {
-    try {
-      const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday']
-      const targetDayIndex = dayNames.indexOf(String(dayName).toLowerCase())
-      const now = currentTime
-      const todayIndex = now.getDay()
-      const daysToAdd = (targetDayIndex - todayIndex + 7) % 7
-      const nextDate = new Date(now)
-      nextDate.setDate(now.getDate() + daysToAdd)
-      return nextDate
-    } catch { return new Date() }
-  }
+  // Helpers to compute and format header text
+  // Helpers to compute and format header text
 
   const formatScheduleHeaderDate = (date) => {
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -174,17 +169,28 @@ const DoctorProfile = () => {
     <div className='m-3 sm:m-5'>
       {/* Header actions */}
       <div className='flex flex-wrap items-center justify-center md:justify-end mb-4 gap-2 sm:gap-3'>
+<<<<<<< HEAD
         <button onClick={() => setIsEdit(true)} className='bg-emerald-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-emerald-700 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base'>Edit Details</button>
         <button onClick={connectGoogleCalendar} className='bg-red-500 text-white px-3 py-1.5 rounded-md text-sm hover:bg-red-600 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base'>Connect Google Calendar</button>
         <button onClick={syncGoogleCalendar} className='bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-700 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base'>Sync Now</button>
         <button onClick={cleanupGoogle} className='bg-amber-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-amber-700 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base'>Clean up Google</button>
+=======
+        <button onClick={() => setIsEdit(true)} className='bg-emerald-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-emerald-700 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base cursor-pointer'>Edit Details</button>
+        <button onClick={connectGoogleCalendar} className='bg-red-500 text-white px-3 py-1.5 rounded-md text-sm hover:bg-red-600 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base cursor-pointer'>Connect Google Calendar</button>
+        <button onClick={syncGoogleCalendar} className='bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-300 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base cursor-pointer'>Sync Now</button>
+        <button onClick={cleanupGoogle} className='bg-amber-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-amber-700 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base cursor-pointer'>Clean up Google</button>
+>>>>>>> d3068feea322d0333f3a521a1b552ac605e20f0d
       </div>
 
       {/* Profile Card */}
       <div className='bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-6'>
         <div className='flex flex-col md:flex-row gap-4 sm:gap-6'>
           <div className='flex-shrink-0 self-center md:self-start'>
+<<<<<<< HEAD
             <div className='relative'>
+=======
+            <div className='relative cursor-pointer' onClick={() => { if (isEdit && fileInputRef.current) fileInputRef.current.click() }}>
+>>>>>>> d3068feea322d0333f3a521a1b552ac605e20f0d
               <img 
                 src={imagePreview || profileData.image} 
                 alt={profileData.name} 
@@ -192,12 +198,18 @@ const DoctorProfile = () => {
                 onError={(e) => { e.target.src = 'https://via.placeholder.com/192x192?text=Doctor' }} 
               />
               {isEdit && (
+<<<<<<< HEAD
                 <div className='absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity cursor-pointer'>
                   <label className='text-white text-center cursor-pointer'>
+=======
+                <div className='absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center opacity-100 md:opacity-0 md:hover:opacity-100 transition-opacity'>
+                  <div className='text-white text-center pointer-events-none'>
+>>>>>>> d3068feea322d0333f3a521a1b552ac605e20f0d
                     <svg className='w-8 h-8 mx-auto mb-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                       <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' />
                     </svg>
                     Change Photo
+<<<<<<< HEAD
                     <input 
                       type='file' 
                       accept='image/*' 
@@ -207,6 +219,18 @@ const DoctorProfile = () => {
                   </label>
                 </div>
               )}
+=======
+                  </div>
+                </div>
+              )}
+              <input 
+                ref={fileInputRef}
+                type='file' 
+                accept='image/*' 
+                onChange={handleImageChange} 
+                className='hidden' 
+              />
+>>>>>>> d3068feea322d0333f3a521a1b552ac605e20f0d
             </div>
             {isEdit && imageFile && (
               <p className='text-xs text-green-600 mt-2 text-center'>New image selected</p>
@@ -435,12 +459,9 @@ const DoctorProfile = () => {
               const startDate = new Date(firstDay)
               startDate.setDate(startDate.getDate() - firstDay.getDay())
               const days = []
-              const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday']
               for (let i = 0; i < 42; i++) {
                 const date = new Date(startDate)
                 date.setDate(startDate.getDate() + i)
-                const dayName = dayNames[date.getDay()]
-                const daySchedule = profileData.schedule?.[dayName]
                 const isCurrentMonth = date.getMonth() === currentMonth
                 const isToday = date.toDateString() === today.toDateString()
                 

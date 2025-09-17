@@ -1,4 +1,4 @@
-# 🚀 MediSync Local Development Setup Guide
+# 🚀 CRHEMD Local Development Setup Guide
 
 ## 📋 Prerequisites
 
@@ -25,7 +25,7 @@ MONGODB_URI=mongodb://localhost:27017
 JWT_SECRET=your_super_secret_jwt_key_for_local_development
 
 # Admin Credentials
-ADMIN_EMAIL=admin@medisync.com
+ADMIN_EMAIL=admin@CRHEMD.com
 ADMIN_PASSWORD=admin123
 
 # Cloudinary Configuration (you'll need to sign up at cloudinary.com)
@@ -41,7 +41,7 @@ PORT=3000
 **Option A: Local MongoDB**
 - Install MongoDB Community Edition
 - Start MongoDB service
-- Create database: `medisync`
+- Create database: `CRHEMD`
 
 **Option B: MongoDB Atlas (Cloud)**
 - Sign up at [MongoDB Atlas](https://www.mongodb.com/atlas)
@@ -105,7 +105,7 @@ Admin panel will start on `http://localhost:5174`
 ## 🔐 Default Admin Login
 
 Use these credentials to access the admin panel:
-- **Email**: admin@medisync.com
+- **Email**: admin@CRHEMD.com
 - **Password**: admin123
 
 ## 📱 Access URLs

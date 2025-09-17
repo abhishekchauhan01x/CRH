@@ -774,14 +774,71 @@ const syncAppointmentsToGoogle = async (req, res) => {
                         due: start.toISOString()
                     }
                     const hasValidTaskId = typeof apt.googleTaskId === 'string' && apt.googleTaskId.trim().length > 0
+
+                    // Helper: try find an existing task by embedded APT_ID in notes
+                    const tryFindTaskByAptId = async () => {
+                        try {
+                            const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 200, showCompleted: true, showHidden: true })
+                            const items = Array.isArray(list?.data?.items) ? list.data.items : []
+                            for (const t of items) {
+                                if (!t?.id) continue
+                                const notes = typeof t.notes === 'string' ? t.notes : ''
+                                if (notes.includes(`APT_ID:${apt._id}`)) {
+                                    return t
+                                }
+                            }
+                        } catch {}
+                        return null
+                    }
                     if (hasValidTaskId) {
                         try {
                             await tasks.tasks.update({ tasklist: '@default', task: apt.googleTaskId, requestBody: taskBody })
                         } catch (err) {
-                            // If update fails due to missing/invalid task id, try to find existing task by time/title before creating
+                            // If update fails due to missing/invalid task id, try to find existing task by APT_ID first, then by time/title before creating
                             let linked = false
                             try {
-                                const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 100, showCompleted: true, showHidden: true })
+                                const byId = await tryFindTaskByAptId()
+                                if (byId?.id) {
+                                    await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: byId.id })
+                                    try { await tasks.tasks.update({ tasklist: '@default', task: byId.id, requestBody: taskBody }) } catch {}
+                                    linked = true
+                                } else {
+                                    const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 200, showCompleted: true, showHidden: true })
+                                    const items = Array.isArray(list?.data?.items) ? list.data.items : []
+                                    const targetMs = start.getTime(); const windowMs = 5 * 60 * 1000
+                                    const titleMarker = `Appointment with ${apt.userData?.name || 'Patient'}`
+                                    for (const t of items) {
+                                        if (!t?.id) continue
+                                        const dueMs = t.due ? new Date(t.due).getTime() : null
+                                        const timeClose = typeof dueMs === 'number' && Math.abs(dueMs - targetMs) <= windowMs
+                                        const titleMatch = typeof t.title === 'string' && t.title.includes(titleMarker)
+                                        if (timeClose && titleMatch) {
+                                            await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: t.id })
+                                            try { await tasks.tasks.update({ tasklist: '@default', task: t.id, requestBody: taskBody }) } catch {}
+                                            linked = true
+                                            break
+                                        }
+                                    }
+                                }
+                            } catch {}
+                            if (!linked) {
+                                const created = await tasks.tasks.insert({ tasklist: '@default', requestBody: taskBody })
+                                if (created?.data?.id) {
+                                    await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: created.data.id })
+                                }
+                            }
+                        }
+                    } else {
+                        // No stored ID: attempt to link by APT_ID first, then by time/title before creating a new one
+                        let linked = false
+                        try {
+                            const byId = await tryFindTaskByAptId()
+                            if (byId?.id) {
+                                await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: byId.id })
+                                try { await tasks.tasks.update({ tasklist: '@default', task: byId.id, requestBody: taskBody }) } catch {}
+                                linked = true
+                            } else {
+                                const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 200, showCompleted: true, showHidden: true })
                                 const items = Array.isArray(list?.data?.items) ? list.data.items : []
                                 const targetMs = start.getTime(); const windowMs = 5 * 60 * 1000
                                 const titleMarker = `Appointment with ${apt.userData?.name || 'Patient'}`
@@ -796,33 +853,6 @@ const syncAppointmentsToGoogle = async (req, res) => {
                                         linked = true
                                         break
                                     }
-                                }
-                            } catch {}
-                            if (!linked) {
-                                const created = await tasks.tasks.insert({ tasklist: '@default', requestBody: taskBody })
-                                if (created?.data?.id) {
-                                    await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: created.data.id })
-                                }
-                            }
-                        }
-                    } else {
-                        // No stored ID: attempt to link to an existing task by time/title before creating a new one
-                        let linked = false
-                        try {
-                            const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 100, showCompleted: true, showHidden: true })
-                            const items = Array.isArray(list?.data?.items) ? list.data.items : []
-                            const targetMs = start.getTime(); const windowMs = 5 * 60 * 1000
-                            const titleMarker = `Appointment with ${apt.userData?.name || 'Patient'}`
-                            for (const t of items) {
-                                if (!t?.id) continue
-                                const dueMs = t.due ? new Date(t.due).getTime() : null
-                                const timeClose = typeof dueMs === 'number' && Math.abs(dueMs - targetMs) <= windowMs
-                                const titleMatch = typeof t.title === 'string' && t.title.includes(titleMarker)
-                                if (timeClose && titleMatch) {
-                                    await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: t.id })
-                                    try { await tasks.tasks.update({ tasklist: '@default', task: t.id, requestBody: taskBody }) } catch {}
-                                    linked = true
-                                    break
                                 }
                             }
                         } catch {}

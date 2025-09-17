@@ -29,8 +29,8 @@ const RelatedDoctors = ({ speciality, docId }) => {
                         }}
                         className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:-translate-y-[10px] transition-all duration-500 flex flex-col"
                         key={index}>
-                        <div className="w-full h-40 bg-blue-50">
-                            <img className="w-full h-full object-cover" src={item.image} alt={`${item.name} profile`} />
+                        <div className="w-full  bg-blue-50 overflow-hidden">
+                            <img className="w-full h-full object-cover object-center" src={item.image} alt={`${item.name} profile`} />
                         </div>
                         <div className="p-4 flex flex-col gap-1 flex-1">
                             <div className={`flex items-center gap-2 text-sm text-center ${item.available ? 'text-green-500' : 'text-gray-500'} `}>
