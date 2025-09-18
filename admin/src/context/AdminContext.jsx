@@ -15,7 +15,7 @@ const AdminContextProvider = (props) => {
 
     const [dashData, setDashData] = useState(false)
 
-    const backendUrl = "https://api.crhemd.com//"
+    const backendUrl = "https://crh-2.onrender.com/"
 
     const getAllDoctors = async () => {
 

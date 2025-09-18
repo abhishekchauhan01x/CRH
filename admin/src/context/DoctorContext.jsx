@@ -6,7 +6,7 @@ export const DoctorContext = createContext()
 
 const DoctorContextProvider = (props) => {
 
-    const backendUrl = "https://api.crhemd.com//"
+    const backendUrl = "https://api.crhemd.com/"
 
     const [dToken, setDToken] = useState(sessionStorage.getItem('dToken') ? sessionStorage.getItem('dToken') : '')
     const [appointments, setAppointments] = useState([])
