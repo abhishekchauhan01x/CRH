@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 
@@ -27,6 +27,8 @@ const TopDoctors = () => {
                                 className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300"  
                                 src={item.image} 
                                 alt={`${item.name} profile`}
+                                loading="lazy"
+                                decoding="async"
                                 onError={(e) => {
                                     e.target.src = 'https://via.placeholder.com/256x288?text=Doctor'
                                 }}

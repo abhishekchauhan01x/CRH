@@ -26,6 +26,8 @@ const Banner = () => {
                     className="w-full absolute bottom-0 right-0 object-cover rounded-lg"
                     src={assets.appointment_img}
                     alt="Appointment illustration"
+                    loading="lazy"
+                    decoding="async"
                 />
             </div>
         </div>

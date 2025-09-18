@@ -10,7 +10,7 @@ const Header = () => {
             <div className="md:w-1/2 flex flex-col items-start justify-center gap-4 py-7 md:py-12">
                 <p className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight">Book Appointment <br /> With Trusted Doctors</p>
                 <div className="flex flex-col md:flex-row items-center gap-3 text-white text-sm font-light">
-                    <img className="w-24 md:w-28" src={assets.group_profiles} alt="Group profiles" />
+                    <img className="w-24 md:w-28" src={assets.group_profiles} alt="Group profiles" loading="lazy" decoding="async" />
                     <p>Simply browse through our extensive list of trusted doctors, schedule your appointment hassle-free.</p>
                 </div>
                 <button onClick={()=> navigate('/topdoctors')}
@@ -27,6 +27,8 @@ const Header = () => {
                         className="w-full h-auto max-h-[400px] md:max-h-[450px] object-contain object-center rounded-lg"
                         src={assets.drharpreet}
                         alt="Dr. Harpreet S - ENT Specialist"
+                        loading="eager"
+                        decoding="async"
                     />
                 </div>
             </div>
