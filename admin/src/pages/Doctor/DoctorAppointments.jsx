@@ -226,7 +226,7 @@ const DoctorAppointments = () => {
       {/* Header */}
       <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3'>
         <div>
-          <h1 className='text-2xl font-bold text-gray-800'>All Appointments{profileData?.name ? ` of Dr. ${String(profileData.name).replace(/^\s*(Dr\.\?\s*)+/i,'').trim()}` : ''}</h1>
+          <h1 className='text-2xl font-bold text-gray-800'>All Appointments{profileData?.name ? ` of  ${String(profileData.name).replace(/^\s*(Dr\.\?\s*)+/i,'').trim()}` : ''}</h1>
           <p className='text-gray-600 mt-1'>Your appointments overview</p>
         </div>
         <div className='w-full md:w-auto mt-2 md:mt-0'>
