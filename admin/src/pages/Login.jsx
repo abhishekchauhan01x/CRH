@@ -26,7 +26,7 @@ const Login = () => {
 
             if (state === 'Admin') {
 
-                const { data } = await axios.post(backendUrl + '/api/admin/login', { email, password })
+                const { data } = await axios.post(backendUrl + 'api/admin/login', { email, password })
                 if (data.success) {
                     sessionStorage.setItem('aToken', data.token)
                     setAToken(data.token);
