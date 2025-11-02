@@ -65,7 +65,9 @@ const DoctorProfile = () => {
 
   const connectGoogleCalendar = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/doctor/google/auth-url`, { headers: { dToken } })
+      // Use the hosted URL as the return URL
+      const returnTo = encodeURIComponent('https://crh-rvfg.vercel.app/doctor-profile?google=connected');
+      const { data } = await axios.get(`${backendUrl}/api/doctor/google/auth-url?returnTo=${returnTo}`, { headers: { dToken } })
       if (data.success && data.url) {
         window.location.href = data.url
       } else {

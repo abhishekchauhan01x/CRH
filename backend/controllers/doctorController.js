@@ -662,16 +662,22 @@ const googleOAuthUrl = async (req, res) => {
         // Build a return URL; prefer explicit client-provided, else env/admin origin fallback
         const origin = req.headers.origin
         const adminBase = process.env.ADMIN_APP_URL || origin || 'http://localhost:5174'
-        const requestedReturnTo = typeof req.query.returnTo === 'string' ? req.query.returnTo : ''
+        const requestedReturnTo = typeof req.query.returnTo === 'string' ? decodeURIComponent(req.query.returnTo) : ''
         let returnTo = `${adminBase.replace(/\/$/, '')}/doctor-profile?google=connected`
+        
+        // If a specific returnTo URL is provided, use it (with validation)
         if (requestedReturnTo) {
             try {
                 const u = new URL(requestedReturnTo)
-                // allow same-origin as request or ADMIN_APP_URL
-                if ((origin && u.origin === origin) || (process.env.ADMIN_APP_URL && u.origin === process.env.ADMIN_APP_URL)) {
+                // Allow https://crh-rvfg.vercel.app or same-origin as request or ADMIN_APP_URL
+                if (u.origin === 'https://crh-rvfg.vercel.app' || 
+                    (origin && u.origin === origin) || 
+                    (process.env.ADMIN_APP_URL && u.origin === process.env.ADMIN_APP_URL)) {
                     returnTo = requestedReturnTo
                 }
-            } catch {}
+            } catch (e) {
+                console.log('Invalid returnTo URL provided:', requestedReturnTo)
+            }
         }
         // Sign the requesting doctor id and return URL into OAuth state so callback can identify without auth header
         const stateToken = jwt.sign({ docId: req.doc?.id, returnTo }, process.env.JWT_SECRET, { expiresIn: '10m' })
@@ -888,7 +894,11 @@ const syncAppointmentsToGoogle = async (req, res) => {
                     
             const event = {
                         summary: `${apt.slotTime} - Appointment with ${apt.userData?.name || 'Patient'} ${statusText}`,
-                        description: `Doctor: ${doctor.name}\nPatient: ${apt.userData?.name || ''}\nAmount: ${apt.amount}\nStatus: ${statusNote}\nAPT_ID:${apt._id}`,
+                        description: `Doctor: ${doctor.name}
+Patient: ${apt.userData?.name || ''}
+Amount: ${apt.amount}
+Status: ${statusNote}
+APT_ID:${apt._id}`,
                 start: { dateTime: start.toISOString() },
                 end: { dateTime: end.toISOString() },
                         transparency: 'transparent',
