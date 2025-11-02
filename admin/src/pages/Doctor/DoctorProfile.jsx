@@ -3,13 +3,11 @@ import { DoctorContext } from '../../context/DoctorContext'
 import { AppContext } from '../../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-import { useNavigate } from 'react-router-dom'
 
 const DoctorProfile = () => {
 
   const { dToken, profileData, setProfileData, getProfileData, backendUrl } = useContext(DoctorContext)
   const { currency } = useContext(AppContext)
-  const navigate = useNavigate()
 
   const [isEdit, setIsEdit] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -67,8 +65,7 @@ const DoctorProfile = () => {
 
   const connectGoogleCalendar = async () => {
     try {
-      const returnTo = encodeURIComponent(window.location.href)
-      const { data } = await axios.get(`${backendUrl}/api/doctor/google/auth-url?returnTo=${returnTo}`, { headers: { dToken } })
+      const { data } = await axios.get(`${backendUrl}/api/doctor/google/auth-url`, { headers: { dToken } })
       if (data.success && data.url) {
         window.location.href = data.url
       } else {
