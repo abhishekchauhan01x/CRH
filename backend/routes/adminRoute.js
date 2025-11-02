@@ -1,5 +1,5 @@
 import express from 'express'
-import { addDoctor,adminDashboard,allDoctors,appointmentCancel,appointmentComplete,appointmentsAdmin,loginAdmin,getAllPatients,updateDoctorSchedule, updateDoctorProfileAdmin, resetDoctorPassword, getDoctorDetails, deleteDoctor, deletePatient, deleteAppointmentAdmin, cleanupDoctorGoogle, adminDisconnectDoctorGoogle } from '../controllers/adminController.js'
+import { addDoctor,adminDashboard,allDoctors,appointmentCancel,appointmentComplete,appointmentsAdmin,loginAdmin,getAllPatients,updateDoctorSchedule, updateDoctorProfileAdmin, resetDoctorPassword, getDoctorDetails, deleteDoctor, deletePatient, deleteAppointmentAdmin, cleanupDoctorGoogle, adminDisconnectDoctorGoogle, adminGetDoctorGoogleOAuthUrl } from '../controllers/adminController.js'
 import upload from '../middlewares/multer.js'
 import authAdmin from '../middlewares/authAdmin.js'
 import {changeAvailablity } from '../controllers/doctorController.js'
@@ -25,6 +25,7 @@ adminRouter.post('/delete-patient',authAdmin,deletePatient)
 adminRouter.post('/delete-appointment',authAdmin,deleteAppointmentAdmin)
 adminRouter.post('/cleanup-doctor-google',authAdmin,cleanupDoctorGoogle)
 adminRouter.post('/disconnect-doctor-google', authAdmin, adminDisconnectDoctorGoogle)
+adminRouter.post('/get-doctor-google-oauth-url', authAdmin, adminGetDoctorGoogleOAuthUrl)
 
 // Token validation endpoint
 adminRouter.get('/validate-token', authAdmin, (req, res) => {
