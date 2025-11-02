@@ -663,7 +663,11 @@ const googleOAuthUrl = async (req, res) => {
         const origin = req.headers.origin
         const adminBase = process.env.ADMIN_APP_URL || origin || 'http://localhost:5174'
         const requestedReturnTo = typeof req.query.returnTo === 'string' ? decodeURIComponent(req.query.returnTo) : ''
-        let returnTo = `${adminBase.replace(/\/$/, '')}/doctor-profile?google=connected`
+        // Include the doctor ID in the default return URL
+        const docId = req.doc?.id
+        let returnTo = docId 
+            ? `${adminBase.replace(/\/$/, '')}/doctor-profile/${docId}?google=connected`
+            : `${adminBase.replace(/\/$/, '')}/doctor-profile?google=connected`
         
         // If a specific returnTo URL is provided, use it (with validation)
         if (requestedReturnTo) {
