@@ -222,25 +222,25 @@ const DoctorAppointments = () => {
   }
 
   return (
-    <div className='m-5'>
+    <div className='m-3 sm:m-5 text-[12px] sm:text-base'>
       {/* Header */}
-      <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3'>
+      <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-4 sm:mb-6 gap-3'>
         <div>
-          <h1 className='text-2xl font-bold text-gray-800'>All Appointments{profileData?.name ? ` of  ${String(profileData.name).replace(/^\s*(Dr\.\?\s*)+/i,'').trim()}` : ''}</h1>
-          <p className='text-gray-600 mt-1'>Your appointments overview</p>
+          <h1 className='text-xl sm:text-2xl font-bold text-gray-800'>All Appointments{profileData?.name ? ` of  ${String(profileData.name).replace(/^\s*(Dr\.\?\s*)+/i,'').trim()}` : ''}</h1>
+          <p className='text-gray-600 mt-1 text-sm sm:text-base'>Your appointments overview</p>
         </div>
         <div className='w-full md:w-auto mt-2 md:mt-0'>
-          <div className='flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 py-2 w-full'>
-            <img className='w-4 h-4' src={assets.list_icon} alt="Search" />
+          <div className='flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-2.5 py-1.5 sm:px-3 sm:py-2 w-full'>
+            <img className='w-4 h-4 sm:w-4 sm:h-4' src={assets.list_icon} alt="Search" />
             <input
               type="text"
               placeholder="Search patients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className='outline-none text-sm w-full md:w-64'
+              className='outline-none text-xs sm:text-sm w-full md:w-64'
             />
           </div>
-          <div className='mt-2 flex flex-row flex-nowrap gap-2 overflow-x-auto'>
+          <div className='mt-2 flex flex-row flex-nowrap gap-1.5 sm:gap-2 overflow-x-auto'>
             <button onClick={() => getAppointments()} className='flex items-center justify-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap'>
               <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15' /></svg>
               Refresh
@@ -379,32 +379,32 @@ const DoctorAppointments = () => {
       )}
 
       {/* Stats */}
-      <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
+      <div className='grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6'>
         <div className='bg-white p-4 rounded-lg border border-gray-200'>
-          <div className='flex items-center gap-3'>
-            <img className='w-8 h-8' src={assets.appointment_icon} alt="Total Appointments" />
+          <div className='flex items-center gap-2 sm:gap-3'>
+            <img className='w-6 h-6 sm:w-8 sm:h-8' src={assets.appointment_icon} alt="Total Appointments" />
             <div>
-              <p className='text-2xl font-bold text-green-600'>{totalCount}</p>
-              <p className='text-gray-600 text-sm'>Total Appointments</p>
-              <p className='text-xs text-gray-400'>Excludes cancelled</p>
+              <p className='text-xl sm:text-2xl font-bold text-green-600'>{totalCount}</p>
+              <p className='text-gray-600 text-xs sm:text-sm'>Total Appointments</p>
+              <p className='text-[11px] sm:text-xs text-gray-400'>Excludes cancelled</p>
             </div>
           </div>
         </div>
         <div className='bg-white p-4 rounded-lg border border-gray-200'>
-          <div className='flex items-center gap-3'>
-            <img className='w-8 h-8' src={assets.tick_icon} alt="Completed" />
+          <div className='flex items-center gap-2 sm:gap-3'>
+            <img className='w-6 h-6 sm:w-8 sm:h-8' src={assets.tick_icon} alt="Completed" />
             <div>
-              <p className='text-2xl font-bold text-gray-800'>{completedCount}</p>
-              <p className='text-gray-600 text-sm'>Completed</p>
+              <p className='text-xl sm:text-2xl font-bold text-gray-800'>{completedCount}</p>
+              <p className='text-gray-600 text-xs sm:text-sm'>Completed</p>
             </div>
           </div>
               </div>
         <div className='bg-white p-4 rounded-lg border border-gray-200'>
-          <div className='flex items-center gap-3'>
-            <img className='w-8 h-8' src={assets.list_icon} alt="Upcoming" />
+          <div className='flex items-center gap-2 sm:gap-3'>
+            <img className='w-6 h-6 sm:w-8 sm:h-8' src={assets.list_icon} alt="Upcoming" />
               <div>
-              <p className='text-2xl font-bold text-blue-600'>{upcomingCount}</p>
-              <p className='text-gray-600 text-sm'>Upcoming</p>
+              <p className='text-xl sm:text-2xl font-bold text-blue-600'>{upcomingCount}</p>
+              <p className='text-gray-600 text-xs sm:text-sm'>Upcoming</p>
             </div>
           </div>
               </div>
@@ -412,100 +412,100 @@ const DoctorAppointments = () => {
 
       {/* Appointments Table */}
       <div className='bg-white rounded-lg border border-gray-200 overflow-hidden'>
-        <div className='px-6 py-4 border-b border-gray-200'>
+        <div className='px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200'>
           <div className='flex items-center justify-between gap-3 flex-wrap'>
-            <h2 className='text-lg font-semibold text-gray-800'>All Appointments</h2>
+            <h2 className='text-base sm:text-lg font-semibold text-gray-800'>All Appointments</h2>
           </div>
         </div>
 
         {/* Mobile responsive table wrapper */}
-        <div className='overflow-x-auto -mx-4 sm:mx-0'>
-          <div className='min-w-[1100px] sm:min-w-0 px-4 sm:px-0'>
+        <div className='overflow-x-auto -mx-3 sm:mx-0'>
+          <div className='min-w-[950px] sm:min-w-0 px-3 sm:px-0'>
             <table className='min-w-full'>
               <thead className='bg-gray-50'>
                 <tr>
-                  <th className='px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Patient</th>
-                  <th className='px-2 md:px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Contact</th>
-                  <th className='px-2 md:px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Age</th>
-                  <th className='px-2 md:px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Date</th>
-                  <th className='px-2 md:px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Time</th>
-                  <th className='px-2 md:px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Fees</th>
-                  <th className='px-2 md:px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Status</th>
-                  <th className='px-2 md:px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Docs</th>
-                  <th className='px-2 md:px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Actions</th>
+                  <th className='px-2 sm:px-4 md:px-6 py-2.5 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Patient</th>
+                  <th className='px-1.5 sm:px-2 md:px-3 py-2.5 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Contact</th>
+                  <th className='px-1.5 sm:px-2 md:px-3 py-2.5 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Age</th>
+                  <th className='px-1.5 sm:px-2 md:px-3 py-2.5 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Date</th>
+                  <th className='px-1.5 sm:px-2 md:px-3 py-2.5 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Time</th>
+                  <th className='px-1.5 sm:px-2 md:px-3 py-2.5 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Fees</th>
+                  <th className='px-1.5 sm:px-2 md:px-3 py-2.5 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Status</th>
+                  <th className='px-1.5 sm:px-2 md:px-3 py-2.5 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Docs</th>
+                  <th className='px-1.5 sm:px-2 md:px-3 py-2.5 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Actions</th>
                 </tr>
               </thead>
               <tbody className='bg-white divide-y divide-gray-200'>
                 {filteredAppointments.length > 0 ? (
                   filteredAppointments.map((item, index) => (
                     <tr key={item._id || index} className='hover:bg-gray-50'>
-                      <td className='px-4 md:px-6 py-4'>
+                      <td className='px-2 sm:px-4 md:px-6 py-3 sm:py-4'>
                         <div className='flex items-center'>
                           <img
-                            className='h-8 w-8 md:h-10 md:w-10 rounded-full object-cover flex-shrink-0'
+                            className='h-7 w-7 sm:h-8 sm:w-8 md:h-10 md:w-10 rounded-full object-cover flex-shrink-0'
                             src={item.userData?.image}
                             alt={item.userData?.name || 'Patient'}
                             onError={(e) => { e.target.src = 'https://via.placeholder.com/40x40?text=P' }}
                           />
-                          <div className='ml-4 md:ml-6 min-w-0 flex-1'>
-                            <div className='text-sm font-medium text-gray-900 leading-tight break-words'>
+                          <div className='ml-3 sm:ml-4 md:ml-6 min-w-0 flex-1'>
+                            <div className='text-[13px] sm:text-sm font-medium text-gray-900 leading-tight break-words'>
                               {item.userData?.name || 'Unnamed Patient'}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className='px-2 md:px-3 py-4'>
-                        <div className='text-sm text-gray-900 break-words'>{item.userData?.phone || 'No phone'}</div>
-                        <div className='text-sm text-gray-500 break-words'>{item.userData?.email || 'No email'}</div>
+                      <td className='px-1.5 sm:px-2 md:px-3 py-3 sm:py-4'>
+                        <div className='text-[13px] sm:text-sm text-gray-900 break-words'>{item.userData?.phone || 'No phone'}</div>
+                        <div className='text-[12px] sm:text-sm text-gray-500 break-words'>{item.userData?.email || 'No email'}</div>
                       </td>
-                      <td className='px-2 md:px-3 py-4 text-sm text-gray-500'>
+                      <td className='px-1.5 sm:px-2 md:px-3 py-3 sm:py-4 text-[13px] sm:text-sm text-gray-500'>
                         {calculateAge(item.userData?.dob)}
                       </td>
-                      <td className='px-2 md:px-3 py-4 text-sm text-gray-500'>
+                      <td className='px-1.5 sm:px-2 md:px-3 py-3 sm:py-4 text-[13px] sm:text-sm text-gray-500'>
                         <div className='font-medium break-words'>{slotDateFormat(item.slotDate)}</div>
                       </td>
-                      <td className='px-2 md:px-3 py-4 text-sm text-gray-500'>
+                      <td className='px-1.5 sm:px-2 md:px-3 py-3 sm:py-4 text-[13px] sm:text-sm text-gray-500'>
                         <div className='font-medium break-words'>{item.slotTime}</div>
                       </td>
-                      <td className='px-2 md:px-3 py-4 text-sm text-gray-600'>
+                      <td className='px-1.5 sm:px-2 md:px-3 py-3 sm:py-4 text-[13px] sm:text-sm text-gray-600'>
                         {currency}{item.amount}
                       </td>
-                      <td className='px-2 md:px-3 py-4'>
+                      <td className='px-1.5 sm:px-2 md:px-3 py-3 sm:py-4'>
                         {(() => { const s = getAppointmentStatus(item); return (
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${s.className}`}>
+                          <span className={`inline-flex px-2 py-0.5 sm:py-1 text-[11px] sm:text-xs font-semibold rounded-full ${s.className}`}>
                             {s.label}
                           </span>
                         ) })()}
                       </td>
-                      <td className='px-2 md:px-3 py-4'>
+                      <td className='px-1.5 sm:px-2 md:px-3 py-3 sm:py-4'>
                         {item.documents && item.documents.length > 0 ? (
                           <button
                             onClick={() => handleViewDocuments(item.documents)}
-                            className='bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors'
+                            className='bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-1 rounded text-[11px] sm:text-xs font-medium transition-colors'
                             title='View documents'
                           >
                             Docs ({item.documents.length})
                           </button>
                         ) : (
-                          <span className='text-gray-500 text-sm'>No docs</span>
+                          <span className='text-gray-500 text-[12px] sm:text-sm'>No docs</span>
                         )}
                       </td>
-                      <td className='px-2 md:px-3 py-4'>
+                      <td className='px-1.5 sm:px-2 md:px-3 py-3 sm:py-4'>
                         {!item.cancelled && !item.isCompleted && (
                           <div className='flex items-center gap-1 flex-wrap'>
                             <button
                               onClick={() => cancelAppointment(item._id)}
-                              className='p-2 hover:bg-red-100 rounded transition-colors'
+                              className='p-1.5 sm:p-2 hover:bg-red-100 rounded transition-colors'
                               title='Cancel appointment'
                             >
-                              <img className='w-7 h-7 md:w-8 md:h-8' src={assets.cancel_icon} alt='Cancel' />
+                              <img className='w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8' src={assets.cancel_icon} alt='Cancel' />
                             </button>
                             <button
                               onClick={() => completeAppointment(item._id)}
-                              className='p-2 hover:bg-green-100 rounded transition-colors'
+                              className='p-1.5 sm:p-2 hover:bg-green-100 rounded transition-colors'
                               title='Mark as completed'
                             >
-                              <img className='w-7 h-7 md:w-8 md:h-8' src={assets.tick_icon} alt='Complete' />
+                              <img className='w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8' src={assets.tick_icon} alt='Complete' />
                             </button>
                           </div>
                         )}
@@ -514,7 +514,7 @@ const DoctorAppointments = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className='px-6 py-12 text-center text-gray-500'>
+                  <td colSpan="8" className='px-4 sm:px-6 py-10 sm:py-12 text-center text-gray-500 text-sm'>
                     No appointments found.
                   </td>
                 </tr>
