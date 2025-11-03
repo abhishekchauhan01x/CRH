@@ -233,14 +233,14 @@ const MyAppointment = () => {
             </div>
           ) : (
             appointments.map((item, index) => (
-              <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
-                <div className="p-6">
-                  <div className="flex flex-col lg:flex-row gap-6">
+              <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
+                <div className="p-4 sm:p-5">
+                  <div className="flex flex-col lg:flex-row gap-4 sm:gap-5">
                     {/* Doctor Image and Info */}
                     <div className="flex-shrink-0">
                       <div className="relative">
                         <img
-                          className="w-32 h-32 object-cover rounded-xl bg-gradient-to-br from-blue-50 to-indigo-100"
+                          className="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100"
                           src={item.docData.image}
                           alt={`${item.docData.name} profile`}
                         />
@@ -263,14 +263,14 @@ const MyAppointment = () => {
 
                     {/* Appointment Details */}
                     <div className="flex-1 min-w-0">
-                      <div className="mb-4">
-                        <h3 className="text-xl font-bold text-gray-900 mb-1">{item.docData.name}</h3>
-                        <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 mb-3">
+                      <div className="mb-3">
+                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">{item.docData.name}</h3>
+                        <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs sm:text-sm font-medium bg-blue-100 text-blue-800 mb-2">
                           {item.docData.speciality}
                         </div>
                       </div>
 
-                      <div className="space-y-3">
+                      <div className="space-y-2.5">
                         <div className="flex items-center">
                           <svg className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -283,7 +283,7 @@ const MyAppointment = () => {
 
                         <button 
                           onClick={() => viewDocuments(item._id)}
-                          className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                          className="inline-flex items-center text-xs sm:text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
                         >
                           <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -294,20 +294,20 @@ const MyAppointment = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-col gap-3 lg:ml-6">
+                    <div className="flex flex-col gap-2.5 lg:ml-6">
                       {item.isCompleted ? (
-                        <div className="px-4 py-2 bg-green-100 text-green-800 rounded-lg text-center font-medium">
+                        <div className="px-3 py-1.5 bg-green-100 text-green-800 rounded-md text-center font-medium text-sm">
                           ✓ Completed
                         </div>
                       ) : item.cancelled ? (
-                        <div className="px-4 py-2 bg-red-100 text-red-800 rounded-lg text-center font-medium">
+                        <div className="px-3 py-1.5 bg-red-100 text-red-800 rounded-md text-center font-medium text-sm">
                           ✕ Cancelled
                         </div>
                       ) : (
                         <>
                           <button 
                             onClick={() => handleReschedule(item.docId, item._id)}
-                            className="px-4 py-2 bg-white border-2 border-blue-500 text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-all duration-200 flex items-center justify-center"
+                            className="px-3 py-2 bg-white border-2 border-blue-500 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-50 transition-all duration-200 flex items-center justify-center"
                           >
                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -317,7 +317,7 @@ const MyAppointment = () => {
                           
                           <button 
                             onClick={() => openWhatsApp(item.docData)}
-                            className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-all duration-200 flex items-center justify-center"
+                            className="px-3 py-2 bg-green-500 text-white rounded-md text-sm font-medium hover:bg-green-600 transition-all duration-200 flex items-center justify-center"
                           >
                             <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
@@ -325,7 +325,7 @@ const MyAppointment = () => {
                             WhatsApp
                           </button>
                           
-                          <label className="px-4 py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-all duration-200 flex items-center justify-center cursor-pointer">
+                          <label className="px-3 py-2 bg-amber-500 text-white rounded-md text-sm font-medium hover:bg-amber-600 transition-all duration-200 flex items-center justify-center cursor-pointer">
                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
@@ -335,7 +335,7 @@ const MyAppointment = () => {
 
                           <button 
                             onClick={() => cancelAppointment(item._id)} 
-                            className="px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all duration-200 flex items-center justify-center"
+                            className="px-3 py-2 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition-all duration-200 flex items-center justify-center"
                           >
                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
