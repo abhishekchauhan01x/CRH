@@ -29,6 +29,16 @@ const App = () => {
   const location = useLocation()
   const navigate = useNavigate()
 
+  // Handle post-OAuth redirect marker and route to doctor profile
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const google = params.get('google')
+    if (google === 'connected') {
+      // Navigate to doctor profile; remove the marker param
+      navigate('/doctor-profile', { replace: true })
+    }
+  }, [location.search, navigate])
+
   // Production-ready authentication and routing logic
   useEffect(() => {
     const validateTokensAndRoute = async () => {

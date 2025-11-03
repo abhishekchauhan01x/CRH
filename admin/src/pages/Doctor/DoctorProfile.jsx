@@ -72,9 +72,9 @@ const DoctorProfile = () => {
         return;
       }
       
-      // Redirect back to the current app's doctor profile page after Google auth
+      // Redirect back to the app root to avoid static host 404s on deep links
       const appOrigin = window.location.origin
-      const returnTo = encodeURIComponent(`${appOrigin}/doctor-profile?google=connected`)
+      const returnTo = encodeURIComponent(`${appOrigin}/?google=connected`)
       const { data } = await axios.get(`${backendUrl}/api/doctor/google/auth-url?returnTo=${returnTo}`, { headers: { dToken } })
       if (data.success && data.url) {
         window.location.href = data.url
