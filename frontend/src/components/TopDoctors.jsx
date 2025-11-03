@@ -22,9 +22,9 @@ const TopDoctors = () => {
                         }}
                         className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:shadow-md sm:hover:shadow-lg transition-all duration-300 bg-white max-w-xs sm:max-w-sm w-full mx-auto"
                         key={index}>
-                        <div className="relative w-full h-40 xs:h-44 sm:h-56 md:h-64 lg:h-72 bg-blue-50 overflow-hidden">
+                        <div className="relative w-full h-40 xs:h-44 sm:h-48 md:h-56 lg:h-64 bg-blue-50 overflow-hidden">
                             <img 
-                                className="w-full h-full object-contain md:object-cover object-center p-3 sm:p-4 md:p-0 md:hover:scale-105 transition-transform duration-300"  
+                                className="w-full h-full object-contain object-center p-3 sm:p-4"  
                                 src={item.image} 
                                 alt={`${item.name} profile`}
                                 loading="lazy"
