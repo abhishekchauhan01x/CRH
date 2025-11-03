@@ -36,7 +36,7 @@ const Doctors = () => {
             >
               <div className="relative w-full h-60 sm:h-60 md:h-64 lg:h-72 bg-blue-50 overflow-hidden">
                 <img 
-                  className="w-full h-full object-contain md:object-cover object-top md:object-center p-2 sm:p-0 transform -translate-y-[2px] sm:translate-y-0 md:hover:scale-105 transition-transform duration-300" 
+                  className="w-full h-full object-contain sm:object-cover object-center p-3 sm:p-0 md:hover:scale-105 transition-transform duration-300" 
                   src={item.image} 
                   alt={`${item.name} profile`}
                   onError={(e) => {
