@@ -26,7 +26,8 @@ const Login = () => {
 
             if (state === 'Admin') {
 
-                const { data } = await axios.post(backendUrl + '/api/admin/login', { email, password })
+                const base = backendUrl && typeof backendUrl === 'string' ? backendUrl.replace(/\/$/, '') : ''
+                const { data } = await axios.post(`${base}/api/admin/login`, { email, password })
                 if (data.success) {
                     sessionStorage.setItem('aToken', data.token)
                     setAToken(data.token);
@@ -38,7 +39,8 @@ const Login = () => {
 
             } else {
 
-                const { data } = await axios.post(backendUrl + '/api/doctor/login', { email, password })
+                const base = backendUrl && typeof backendUrl === 'string' ? backendUrl.replace(/\/$/, '') : ''
+                const { data } = await axios.post(`${base}/api/doctor/login`, { email, password })
                 if (data.success) {
                     sessionStorage.setItem('dToken', data.token)
                     setDToken(data.token);
