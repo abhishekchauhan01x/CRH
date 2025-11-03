@@ -72,7 +72,9 @@ const DoctorProfile = () => {
         return;
       }
       
-      const returnTo = encodeURIComponent(`https://crh-rvfg.vercel.app/doctor-profile/${doctorId}?google=connected`);
+      // Redirect back to the current app's doctor profile page after Google auth
+      const appOrigin = window.location.origin
+      const returnTo = encodeURIComponent(`${appOrigin}/doctor-profile?google=connected`)
       const { data } = await axios.get(`${backendUrl}/api/doctor/google/auth-url?returnTo=${returnTo}`, { headers: { dToken } })
       if (data.success && data.url) {
         window.location.href = data.url

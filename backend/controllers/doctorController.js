@@ -48,36 +48,24 @@ const changeAvailablity = async (req, res) => {
     }
 }
 
-const doctorList = async (req, res) => {
+// API for doctor login
+const loginDoctor = async (req, res) => {
     try {
-        // Get doctors without sensitive fields
-        const doctorsRaw = await doctorModel.find({}).select(['-password', '-email'])
-
-        // Build a fresh slots_booked map from actual non-cancelled appointments
-        const doctorIds = doctorsRaw.map(d => String(d._id))
-        const apts = await appointmentModel
-            .find({ docId: { $in: doctorIds }, cancelled: { $ne: true }, isCompleted: { $ne: true } })
-            .select('docId slotDate slotTime')
-
-        const byDoctor = new Map()
-        for (const apt of apts) {
-            const did = String(apt.docId)
-            if (!byDoctor.has(did)) byDoctor.set(did, {})
-            const map = byDoctor.get(did)
-            const dateKey = String(apt.slotDate || '')
-            const timeVal = String(apt.slotTime || '')
-            if (!map[dateKey]) map[dateKey] = []
-            if (timeVal && !map[dateKey].includes(timeVal)) map[dateKey].push(timeVal)
+        const { email, password } = req.body
+        const doctor = await doctorModel.findOne({ email })
+        
+        if (!doctor) {
+            return res.json({ success: false, message: 'Invalid Credentials' })
         }
 
-        // Return doctors with computed slots_booked so orphaned slots are never shown
-        const doctors = doctorsRaw.map(d => {
-            const obj = d.toObject()
-            obj.slots_booked = byDoctor.get(String(d._id)) || {}
-            return obj
-        })
+        const isMatch = await bcrypt.compare(password, doctor.password)
 
-        res.json({ success: true, doctors })
+        if (isMatch) {
+            const token = jwt.sign({ id: doctor._id }, process.env.JWT_SECRET)
+            res.json({ success: true, token })
+        } else {
+            res.json({ success: false, message: 'Invalid Credentials' })
+        }
 
     } catch (error) {
         console.log(error)
@@ -85,53 +73,7 @@ const doctorList = async (req, res) => {
     }
 }
 
-//  Api for doctor login 
-const loginDoctor = async (req, res) => {
-
-    try {
-        const { email, password } = req.body
-        
-        console.log('=== DOCTOR LOGIN DEBUG ===');
-        console.log('Received login request for email:', email);
-        console.log('Password provided:', password ? 'YES' : 'NO');
-        
-        const doctor = await doctorModel.findOne({ email })
-        
-        console.log('Doctor found:', doctor ? 'YES' : 'NO');
-        if (doctor) {
-            console.log('Doctor ID:', doctor._id);
-            console.log('Doctor name:', doctor.name);
-            console.log('Has password field:', !!doctor.password);
-            console.log('Password field length:', doctor.password ? doctor.password.length : 'N/A');
-        }
-
-        if (!doctor) {
-            console.log('No doctor found with this email');
-            return res.json({ success: false, message: 'Invalid Credentials' })
-        }
-
-        const isMatch = await bcrypt.compare(password, doctor.password)
-        console.log('Password match result:', isMatch);
-
-        if (isMatch) {
-            const token = jwt.sign({ id: doctor._id }, process.env.JWT_SECRET)
-            console.log('Login successful, token generated');
-            console.log('=== END DEBUG ===');
-            res.json({ success: true, token })
-        } else {
-            console.log('Password does not match');
-            console.log('=== END DEBUG ===');
-            res.json({ success: false, message: 'Invalid Credentials' })
-        }
-
-    } catch (error) {
-        console.log('Login error:', error)
-        console.log('=== END DEBUG ===');
-        res.json({ success: false, message: error.message })
-    }
-}
-
-// APi to get doctor appointments for doctor panel
+// API to get doctor appointments for doctor panel
 const appointmentsdoctor = async (req, res) => {
     try {
         const docId = req.doc.id
@@ -492,66 +434,50 @@ const findAndLinkGoogleEvent = async (appointmentData, eventBody, calendar) => {
     }
 }
 
-//  API to mark appointment complete for doctor panel
+// API to mark appointment as complete
 const appointmentComplete = async (req, res) => {
     try {
         const { appointmentId } = req.body
-        const docId = req.doc.id
-
-        const appointmentData = await appointmentModel.findById(appointmentId)
-
-        if (appointmentData && appointmentData.docId === docId) {
-            await appointmentModel.findByIdAndUpdate(appointmentId, { isCompleted: true })
-            // release doctor slot on completion (same as cancel)
-            try {
-                const { slotDate, slotTime } = appointmentData
-                const doctorData = await doctorModel.findById(docId)
-                const slots_booked = doctorData?.slots_booked || {}
-                if (slots_booked[slotDate]) {
-                    slots_booked[slotDate] = slots_booked[slotDate].filter(t => t !== slotTime)
-                    await doctorModel.findByIdAndUpdate(docId, { slots_booked })
-                }
-            } catch {}
-            
-            // Update Google Task/Event status
-            await updateGoogleItemStatus(appointmentId, 'completed', appointmentData)
-            
-            return res.json({ success: true, message: 'Appointment Completed' })
-
-        } else {
-            res.json({ success: false, message: 'Mark failed' })
-        }
-
-
-
+        await appointmentModel.findByIdAndUpdate(appointmentId, { isCompleted: true })
+        
+        // Update Google Task/Event status to completed
+        await updateGoogleItemStatus(appointmentId, 'completed')
+        
+        res.json({ success: true, message: 'Appointment Completed' })
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })
     }
 }
 
-//  API to cancel appointment complete for doctor panel
-
+// API to cancel appointment
 const appointmentCancel = async (req, res) => {
     try {
         const { appointmentId } = req.body
-        const docId = req.doc.id
 
         const appointmentData = await appointmentModel.findById(appointmentId)
-
-        if (appointmentData && appointmentData.docId === docId) {
-            await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
-            
-            // Update Google Task/Event status
-            await updateGoogleItemStatus(appointmentId, 'cancelled', appointmentData)
-            
-            return res.json({ success: true, message: 'Appointment Cancelled' })
-
-        } else {
-            res.json({ success: false, message: 'Cancellation  failed' })
+        
+        if (!appointmentData) {
+            return res.json({ success: false, message: "Appointment not found" })
         }
 
+        await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled: true })
 
+        //releasing doctor slot
+        const { docId, slotDate, slotTime } = appointmentData
+        const doctorData = await doctorModel.findById(docId)
+
+        let slots_booked = doctorData.slots_booked || {};
+        if (slots_booked[slotDate]) {
+            slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime);
+        }
+
+        await doctorModel.findByIdAndUpdate(docId, { slots_booked })
+
+        // Update Google Task/Event status to cancelled
+        await updateGoogleItemStatus(appointmentId, 'cancelled', appointmentData)
+
+        res.json({ success: true, message: 'Appointment Cancelled' })
 
     } catch (error) {
         console.log(error)
@@ -559,16 +485,14 @@ const appointmentCancel = async (req, res) => {
     }
 }
 
-// API to get dashboard data for doctor panel
-
+// API to get doctor dashboard data
 const doctorDashboard = async (req, res) => {
     try {
+
         const docId = req.doc.id
-
         const appointments = await appointmentModel.find({ docId })
-
+        
         let earnings = 0
-
         appointments.map((item) => {
             if (item.isCompleted || item.payment) {
                 earnings += item.amount
@@ -578,7 +502,7 @@ const doctorDashboard = async (req, res) => {
         let patients = []
 
         appointments.map((item) => {
-            if (patients.includes(item.userId)) {
+            if (!patients.includes(item.userId)) {
                 patients.push(item.userId)
             }
         })
@@ -587,7 +511,7 @@ const doctorDashboard = async (req, res) => {
             earnings,
             appointments: appointments.length,
             patients: patients.length,
-            latestAppointments: appointments.reverse().slice(0, 5)
+            latest: appointments.reverse().slice(0, 5)
         }
 
         res.json({ success: true, dashData })
@@ -598,236 +522,221 @@ const doctorDashboard = async (req, res) => {
     }
 }
 
-
-// API to get doctor profile on doctor panel
-
+// API to get doctor profile
 const doctorProfile = async (req, res) => {
     try {
         const docId = req.doc.id
         const profileData = await doctorModel.findById(docId).select('-password')
 
         res.json({ success: true, profileData })
+
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })
     }
 }
 
-//   API to update doctor profile data from doctor panel
-
+// API to update doctor profile
 const updateDoctorProfile = async (req, res) => {
     try {
-        const { fees, address, available } = req.body
-        const docId = req.doc.id
+        const { docId, fees, address, available } = req.body
+        const imageFile = req.file
 
-        await doctorModel.findByIdAndUpdate(docId, { fees, address, available })
+        let updateData = { fees, address, available }
 
-        res.json({ success: true, message: "Profile Updated" })
+        // If image file is provided, upload to Cloudinary
+        if (imageFile) {
+            const imageUpload = await cloudinary.uploader.upload(imageFile.path, { resource_type: "image" })
+            updateData.image = imageUpload.secure_url
+        }
+
+        // Parse address if it's a string
+        if (typeof address === 'string') {
+            try {
+                updateData.address = JSON.parse(address)
+            } catch (error) {
+                return res.json({ success: false, message: "Invalid address format" })
+            }
+        }
+
+        const updatedDoctor = await doctorModel.findByIdAndUpdate(docId, updateData, { new: true }).select('-password')
+
+        res.json({ success: true, message: "Profile Updated", profileData: updatedDoctor })
 
     } catch (error) {
         console.log(error)
         res.json({ success: false, message: error.message })
     }
 }
-export {
-    changeAvailablity,
-    doctorList,
-    loginDoctor,
-    appointmentsdoctor,
-    appointmentComplete,
-    appointmentCancel,
-    doctorDashboard,
-    doctorProfile,
-    updateDoctorProfile,
-    // new exports
-    googleOAuthUrl,
-    googleOAuthCallback,
-    syncAppointmentsToGoogle,
-    // added
-    cleanupGoogleForDoctor,
-    debugGoogleConfig,
-    googleOAuthUrlDebug,
-    googleDisconnect,
+
+// API to get doctor list for frontend
+const doctorList = async (req, res) => {
+    try {
+        const doctors = await doctorModel.find({}).select(['-password', '-email'])
+        res.json({ success: true, doctors })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
 }
 
+// Google OAuth URL generation
 const googleOAuthUrl = async (req, res) => {
     try {
+        const docId = req.doc?.id
+        if (!docId) {
+            return res.status(401).json({ success: false, message: 'Unauthorized' })
+        }
+
         const oAuth2Client = getOAuth2Client()
-        const useTasks = String(process.env.GOOGLE_USE_TASKS || '').toLowerCase() === 'true'
-        // Request both scopes so we can always update Calendar events even when using Tasks mode
         const scopes = [
             'https://www.googleapis.com/auth/tasks',
             'https://www.googleapis.com/auth/calendar.events'
         ]
-        // Build a return URL; prefer explicit client-provided, else env/admin origin fallback
-        const origin = req.headers.origin
-        const adminBase = process.env.ADMIN_APP_URL || origin || 'http://localhost:5174'
-        const requestedReturnTo = typeof req.query.returnTo === 'string' ? decodeURIComponent(req.query.returnTo) : ''
-        // Include the doctor ID in the default return URL
-        const docId = req.doc?.id
-        let returnTo = docId 
+
+        // Use the doctor's returnTo URL if available, otherwise fall back to admin base URL
+        const doctor = await doctorModel.findById(docId)
+        const adminBase = process.env.ADMIN_APP_URL || 'http://localhost:5174'
+        
+        let returnTo = doctor?.googleReturnTo 
             ? `${adminBase.replace(/\/$/, '')}/doctor-profile/${docId}?google=connected`
             : `${adminBase.replace(/\/$/, '')}/doctor-profile?google=connected`
-        
-        // If a specific returnTo URL is provided, use it (with validation)
-        if (requestedReturnTo) {
-            try {
-                const u = new URL(requestedReturnTo)
-                // Allow https://crh-rvfg.vercel.app or same-origin as request or ADMIN_APP_URL
-                if (u.origin === 'https://crh-rvfg.vercel.app' || 
-                    (origin && u.origin === origin) || 
-                    (process.env.ADMIN_APP_URL && u.origin === process.env.ADMIN_APP_URL)) {
-                    returnTo = requestedReturnTo
-                }
-            } catch (e) {
-                console.log('Invalid returnTo URL provided:', requestedReturnTo)
-            }
-        }
-        // Sign the requesting doctor id and return URL into OAuth state so callback can identify without auth header
-        const stateToken = jwt.sign({ docId: req.doc?.id, returnTo }, process.env.JWT_SECRET, { expiresIn: '10m' })
-        const url = oAuth2Client.generateAuthUrl({ access_type: 'offline', scope: scopes, prompt: 'consent', state: stateToken })
-        try {
-            const cid = String(process.env.GOOGLE_CLIENT_ID || '')
-            console.log('Google OAuth URL generated with client:', cid ? `***${cid.slice(-8)}` : 'NOT_SET')
-            console.log('Google Redirect URI:', process.env.GOOGLE_REDIRECT_URI || 'NOT_SET')
-        } catch {}
-        res.json({ success: true, url })
+
+        const stateToken = jwt.sign({ docId, returnTo }, process.env.JWT_SECRET)
+        const url = oAuth2Client.generateAuthUrl({
+            access_type: 'offline',
+            scope: scopes,
+            prompt: 'consent',
+            state: stateToken
+        })
+
+        return res.json({ success: true, url })
     } catch (e) {
-        console.log(e)
-        if (e?.code === 'ENV_MISSING') {
-            return res.status(500).json({ success: false, message: e.message })
-        }
-        res.status(400).json({ success: false, message: e.message || 'invalid_request' })
+        console.error('Google OAuth URL generation failed:', e)
+        return res.status(500).json({ success: false, message: e.message })
     }
 }
 
+// Google OAuth callback handler
 const googleOAuthCallback = async (req, res) => {
     try {
-        const code = req.query.code
-        const state = req.query.state
-        if (!code) return res.status(400).json({ success: false, message: 'Missing code' })
-        if (!state) return res.status(401).json({ success: false, message: 'Missing state' })
-
-        let decoded
-        try {
-            decoded = jwt.verify(state, process.env.JWT_SECRET)
-        } catch (_) {
-            return res.status(401).json({ success: false, message: 'Invalid state' })
+        const { code, state } = req.query
+        if (!code || !state) {
+            return res.status(400).json({ success: false, message: 'Missing code or state parameter' })
         }
 
-        const docId = decoded?.docId
-        const returnTo = decoded?.returnTo
-        if (!docId) return res.status(401).json({ success: false, message: 'Unauthorized' })
+        // Verify state token
+        let stateData
+        try {
+            stateData = jwt.verify(state, process.env.JWT_SECRET)
+        } catch (e) {
+            return res.status(401).json({ success: false, message: 'Invalid state token' })
+        }
+
+        const { docId, returnTo } = stateData
+        const doctor = await doctorModel.findById(docId)
+        if (!doctor) {
+            return res.status(404).json({ success: false, message: 'Doctor not found' })
+        }
 
         const oAuth2Client = getOAuth2Client()
         const { tokens } = await oAuth2Client.getToken(code)
-        oAuth2Client.setCredentials(tokens)
+        const { refresh_token } = tokens
 
-        // Only update refresh token if Google returned one (it is only returned on first consent or when re-consented)
-        if (tokens.refresh_token) {
-            await doctorModel.findByIdAndUpdate(docId, { googleRefreshToken: tokens.refresh_token })
+        if (!refresh_token) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Missing refresh token - please ensure "access_type: offline" was set during authorization' 
+            })
         }
 
-        if (returnTo) {
-            return res.redirect(returnTo)
-        }
-        res.json({ success: true, message: 'Google connected successfully' })
+        // Save refresh token and returnTo URL to doctor document
+        await doctorModel.findByIdAndUpdate(docId, { 
+            googleRefreshToken: refresh_token,
+            googleReturnTo: returnTo
+        })
+
+        // Redirect back to admin panel with success message
+        const redirectUrl = `${returnTo}&success=true`
+        res.redirect(redirectUrl)
     } catch (e) {
-        console.log(e); res.json({ success: false, message: e.message })
+        console.error('Google OAuth callback failed:', e)
+        res.status(500).json({ success: false, message: e.message })
     }
 }
 
+// Sync appointments to Google Calendar/Tasks
 const syncAppointmentsToGoogle = async (req, res) => {
     try {
         const docId = req.doc?.id
         const doctor = await doctorModel.findById(docId)
-        if (!doctor || !doctor.googleRefreshToken) {
-            return res.json({ success: false, message: 'Google not connected' })
-        }
+        if (!doctor) return res.json({ success: false, message: 'Doctor not found' })
+        if (!doctor.googleRefreshToken) return res.json({ success: false, message: 'Google not connected' })
+
         const oAuth2Client = getOAuth2Client()
         oAuth2Client.setCredentials({ refresh_token: doctor.googleRefreshToken })
+        
         const useTasks = String(process.env.GOOGLE_USE_TASKS || '').toLowerCase() === 'true'
-        const calendar = !useTasks ? google.calendar({ version: 'v3', auth: oAuth2Client }) : null
-        const tasks = useTasks ? google.tasks({ version: 'v1', auth: oAuth2Client }) : null
-        const appointments = await appointmentModel.find({ docId })
+        const appointments = await appointmentModel.find({ 
+            docId, 
+            cancelled: { $ne: true },
+            isCompleted: { $ne: true },
+            slotDate: { $exists: true },
+            slotTime: { $exists: true }
+        }).populate('userId', 'name')
 
+        // Process each appointment
         for (const apt of appointments) {
-            if (apt.cancelled) continue
-            const dateParts = (apt.slotDate || '').split('_')
-            if (dateParts.length !== 3) continue
-            const [day, month, year] = dateParts
-            const start = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
-            // parse 12h to 24h
-            const m = (apt.slotTime || '').match(/(\d+):(\d+)\s*(AM|PM)/i)
-            if (m) {
-                let h = parseInt(m[1]); const min = parseInt(m[2]); const per = m[3].toUpperCase()
+            try {
+                // Skip if appointment data is incomplete
+                if (!apt.slotDate || !apt.slotTime || !apt.userId) continue
+                
+                // Parse appointment date and time
+                const dateParts = apt.slotDate.split('_')
+                if (dateParts.length !== 3) continue
+                
+                const [day, month, year] = dateParts
+                const start = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+                
+                // Parse 12h to 24h
+                const m = apt.slotTime.match(/(\d+):(\d+)\s*(AM|PM)/i)
+                if (!m) continue
+                
+                let h = parseInt(m[1])
+                const min = parseInt(m[2])
+                const per = m[3].toUpperCase()
                 if (per === 'PM' && h !== 12) h += 12
                 if (per === 'AM' && h === 12) h = 0
                 start.setHours(h, min, 0, 0)
-            }
-            try {
+                
                 if (useTasks) {
-                    // Determine status for display
-                    let statusText = '⏳ PENDING'
-                    let statusNote = 'PENDING'
-                    if (apt.isCompleted) {
-                        statusText = '✅ COMPLETED'
-                        statusNote = 'COMPLETED'
-                    } else if (apt.cancelled) {
-                        statusText = '❌ CANCELLED'
-                        statusNote = 'CANCELLED'
-                    }
-                    
+                    const tasks = google.tasks({ version: 'v1', auth: oAuth2Client })
                     const taskBody = {
-                        title: `${apt.slotTime} - Appointment with ${apt.userData?.name || 'Patient'} ${statusText}`,
-                        notes: `Doctor: ${doctor.name}\nPatient: ${apt.userData?.name || ''}\nStatus: ${statusNote}\nAPT_ID:${apt._id}`,
+                        title: `${apt.slotTime} - Appointment with ${apt.userData?.name || 'Patient'}`,
+                        notes: `Doctor: ${doctor.name}
+Patient: ${apt.userData?.name || ''}
+Amount: ${apt.amount}
+Status: PENDING
+APT_ID:${apt._id}`,
                         due: start.toISOString()
                     }
-                    const hasValidTaskId = typeof apt.googleTaskId === 'string' && apt.googleTaskId.trim().length > 0
-
-                    // Helper: try find an existing task by embedded APT_ID in notes
-                    const tryFindTaskByAptId = async () => {
-                        try {
-                            const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 200, showCompleted: true, showHidden: true })
-                            const items = Array.isArray(list?.data?.items) ? list.data.items : []
-                            for (const t of items) {
-                                if (!t?.id) continue
-                                const notes = typeof t.notes === 'string' ? t.notes : ''
-                                if (notes.includes(`APT_ID:${apt._id}`)) {
-                                    return t
-                                }
-                            }
-                        } catch {}
-                        return null
-                    }
-                    if (hasValidTaskId) {
+                    
+                    if (apt.googleTaskId) {
                         try {
                             await tasks.tasks.update({ tasklist: '@default', task: apt.googleTaskId, requestBody: taskBody })
                         } catch (err) {
-                            // If update fails due to missing/invalid task id, try to find existing task by APT_ID first, then by time/title before creating
+                            // If update fails, try to find existing task by APT_ID first, then by time/title before creating
                             let linked = false
                             try {
-                                const byId = await tryFindTaskByAptId()
-                                if (byId?.id) {
-                                    await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: byId.id })
-                                    try { await tasks.tasks.update({ tasklist: '@default', task: byId.id, requestBody: taskBody }) } catch {}
-                                    linked = true
-                                } else {
-                                    const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 200, showCompleted: true, showHidden: true })
-                                    const items = Array.isArray(list?.data?.items) ? list.data.items : []
-                                    const targetMs = start.getTime(); const windowMs = 5 * 60 * 1000
-                                    const titleMarker = `Appointment with ${apt.userData?.name || 'Patient'}`
-                                    for (const t of items) {
-                                        if (!t?.id) continue
-                                        const dueMs = t.due ? new Date(t.due).getTime() : null
-                                        const timeClose = typeof dueMs === 'number' && Math.abs(dueMs - targetMs) <= windowMs
-                                        const titleMatch = typeof t.title === 'string' && t.title.includes(titleMarker)
-                                        if (timeClose && titleMatch) {
-                                            await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: t.id })
-                                            try { await tasks.tasks.update({ tasklist: '@default', task: t.id, requestBody: taskBody }) } catch {}
-                                            linked = true
-                                            break
-                                        }
+                                const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 100, showCompleted: true, showHidden: true })
+                                const items = Array.isArray(list?.data?.items) ? list.data.items : []
+                                for (const t of items) {
+                                    if (!t?.id) continue
+                                    if (t.notes && t.notes.includes(`APT_ID:${apt._id}`)) {
+                                        await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: t.id })
+                                        try { await tasks.tasks.update({ tasklist: '@default', task: t.id, requestBody: taskBody }) } catch {}
+                                        linked = true
+                                        break
                                     }
                                 }
                             } catch {}
@@ -842,27 +751,15 @@ const syncAppointmentsToGoogle = async (req, res) => {
                         // No stored ID: attempt to link by APT_ID first, then by time/title before creating a new one
                         let linked = false
                         try {
-                            const byId = await tryFindTaskByAptId()
-                            if (byId?.id) {
-                                await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: byId.id })
-                                try { await tasks.tasks.update({ tasklist: '@default', task: byId.id, requestBody: taskBody }) } catch {}
-                                linked = true
-                            } else {
-                                const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 200, showCompleted: true, showHidden: true })
-                                const items = Array.isArray(list?.data?.items) ? list.data.items : []
-                                const targetMs = start.getTime(); const windowMs = 5 * 60 * 1000
-                                const titleMarker = `Appointment with ${apt.userData?.name || 'Patient'}`
-                                for (const t of items) {
-                                    if (!t?.id) continue
-                                    const dueMs = t.due ? new Date(t.due).getTime() : null
-                                    const timeClose = typeof dueMs === 'number' && Math.abs(dueMs - targetMs) <= windowMs
-                                    const titleMatch = typeof t.title === 'string' && t.title.includes(titleMarker)
-                                    if (timeClose && titleMatch) {
-                                        await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: t.id })
-                                        try { await tasks.tasks.update({ tasklist: '@default', task: t.id, requestBody: taskBody }) } catch {}
-                                        linked = true
-                                        break
-                                    }
+                            const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 100, showCompleted: true, showHidden: true })
+                            const items = Array.isArray(list?.data?.items) ? list.data.items : []
+                            for (const t of items) {
+                                if (!t?.id) continue
+                                if (t.notes && t.notes.includes(`APT_ID:${apt._id}`)) {
+                                    await appointmentModel.findByIdAndUpdate(apt._id, { googleTaskId: t.id })
+                                    try { await tasks.tasks.update({ tasklist: '@default', task: t.id, requestBody: taskBody }) } catch {}
+                                    linked = true
+                                    break
                                 }
                             }
                         } catch {}
@@ -874,45 +771,50 @@ const syncAppointmentsToGoogle = async (req, res) => {
                         }
                     }
                 } else {
-                    // Determine status for display
-                    let statusText = '⏳ PENDING'
-                    let statusNote = 'PENDING'
-                    if (apt.isCompleted) {
-                        statusText = '✅ COMPLETED'
-                        statusNote = 'COMPLETED'
-                    } else if (apt.cancelled) {
-                        statusText = '❌ CANCELLED'
-                        statusNote = 'CANCELLED'
-                    }
-                    
-                    const end = new Date(start.getTime() + 1 * 60000)
-                    // Set color based on status for Calendar events
-                    let colorId = '1' // Default color (blue)
-                    if (apt.isCompleted) {
-                        colorId = '2' // Green
-                    } else if (apt.cancelled) {
-                        colorId = '4' // Red
-                    } else if (!apt.isCompleted && !apt.cancelled) {
-                        colorId = '1' // Blue
-                    }
-                    
-            const event = {
-                        summary: `${apt.slotTime} - Appointment with ${apt.userData?.name || 'Patient'} ${statusText}`,
+                    const calendar = google.calendar({ version: 'v3', auth: oAuth2Client })
+                    const end = new Date(start.getTime() + 30 * 60000) // 30 min appointments
+                    const event = {
+                        summary: `${apt.slotTime} - Appointment with ${apt.userData?.name || 'Patient'}`,
                         description: `Doctor: ${doctor.name}
 Patient: ${apt.userData?.name || ''}
 Amount: ${apt.amount}
-Status: ${statusNote}
+Status: PENDING
 APT_ID:${apt._id}`,
-                start: { dateTime: start.toISOString() },
-                end: { dateTime: end.toISOString() },
-                        transparency: 'transparent',
-                        colorId: colorId
+                        start: { dateTime: start.toISOString() },
+                        end: { dateTime: end.toISOString() },
+                        transparency: 'transparent'
                     }
+                    
                     if (apt.googleEventId) {
-                        // Update existing event instead of deleting
-                        await calendar.events.update({ calendarId: 'primary', eventId: apt.googleEventId, requestBody: event })
+                        try {
+                            await calendar.events.update({ calendarId: 'primary', eventId: apt.googleEventId, requestBody: event })
+                        } catch (err) {
+                            // If update fails, try to find existing event by APT_ID first, then by time/title before creating
+                            let linked = false
+                            try {
+                                const timeMin = new Date(start.getTime() - 10 * 60 * 1000).toISOString()
+                                const timeMax = new Date(start.getTime() + 10 * 60 * 1000).toISOString()
+                                const list = await calendar.events.list({ calendarId: 'primary', timeMin, timeMax, maxResults: 50, singleEvents: true, q: 'Appointment with' })
+                                const items = Array.isArray(list?.data?.items) ? list.data.items : []
+                                for (const e of items) {
+                                    if (!e?.id) continue
+                                    if (e.description && e.description.includes(`APT_ID:${apt._id}`)) {
+                                        await appointmentModel.findByIdAndUpdate(apt._id, { googleEventId: e.id })
+                                        try { await calendar.events.update({ calendarId: 'primary', eventId: e.id, requestBody: event }) } catch {}
+                                        linked = true
+                                        break
+                                    }
+                                }
+                            } catch {}
+                            if (!linked) {
+                                const created = await calendar.events.insert({ calendarId: 'primary', requestBody: event })
+                                if (created?.data?.id) {
+                                    await appointmentModel.findByIdAndUpdate(apt._id, { googleEventId: created.data.id })
+                                }
+                            }
+                        }
                     } else {
-                        // Try to find an existing event within a short window before creating
+                        // No stored ID: attempt to link by APT_ID first, then by time/title before creating a new one
                         let linked = false
                         try {
                             const timeMin = new Date(start.getTime() - 10 * 60 * 1000).toISOString()
@@ -921,10 +823,7 @@ APT_ID:${apt._id}`,
                             const items = Array.isArray(list?.data?.items) ? list.data.items : []
                             for (const e of items) {
                                 if (!e?.id) continue
-                                const st = e.start?.dateTime || e.start?.date
-                                if (!st) continue
-                                const eventMs = new Date(st).getTime()
-                                if (Math.abs(eventMs - start.getTime()) <= 5 * 60 * 1000) {
+                                if (e.description && e.description.includes(`APT_ID:${apt._id}`)) {
                                     await appointmentModel.findByIdAndUpdate(apt._id, { googleEventId: e.id })
                                     try { await calendar.events.update({ calendarId: 'primary', eventId: e.id, requestBody: event }) } catch {}
                                     linked = true
@@ -968,10 +867,6 @@ const cleanupGoogleForDoctor = async (req, res) => {
             const tasks = google.tasks({ version: 'v1', auth: oAuth2Client })
             let pageToken
             const titleMarker = 'Appointment with '
-            const rawDoctorName = String(doctor.name || '')
-            const cleanedDoctorName = rawDoctorName.replace(/^\s*(Dr\.?\s*)+/i,'').trim()
-            const doctorMarkerRaw = `Doctor: ${rawDoctorName}`
-            const doctorMarkerCleaned = `Doctor: ${cleanedDoctorName}`
             do {
                 const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 100, pageToken, showCompleted: true, showHidden: true })
                 const items = Array.isArray(list?.data?.items) ? list.data.items : []
@@ -979,7 +874,7 @@ const cleanupGoogleForDoctor = async (req, res) => {
                     if (!t?.id) continue
                     const titleMatch = typeof t.title === 'string' && t.title.includes(titleMarker)
                     const notes = String(t.notes || '')
-                    const notesMatch = notes.includes(doctorMarkerRaw) || notes.includes(doctorMarkerCleaned) || notes.includes('Doctor: ')
+                    const notesMatch = notes.includes(`Doctor: ${doctor.name}`) || notes.includes('Doctor: ')
                     if (titleMatch && notesMatch) {
                         try { await tasks.tasks.delete({ tasklist: '@default', task: t.id }); deletedTasks++ } catch {}
                     }
@@ -1066,4 +961,23 @@ const googleDisconnect = async (req, res) => {
     } catch (e) {
         return res.status(500).json({ success: false, message: e.message })
     }
+}
+
+// Export all functions at the end of the file
+export {
+    loginDoctor,
+    appointmentsdoctor,
+    appointmentComplete,
+    appointmentCancel,
+    doctorDashboard,
+    doctorProfile,
+    updateDoctorProfile,
+    doctorList,
+    googleOAuthUrl,
+    googleOAuthCallback,
+    syncAppointmentsToGoogle,
+    cleanupGoogleForDoctor,
+    debugGoogleConfig,
+    googleOAuthUrlDebug,
+    googleDisconnect
 }

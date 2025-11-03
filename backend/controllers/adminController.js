@@ -695,61 +695,6 @@ export const adminDisconnectDoctorGoogle = async (req, res) => {
         return res.status(500).json({ success: false, message: e.message })
     }
 }
-// Admin endpoint to generate Google OAuth URL for any doctor
-export const adminGetDoctorGoogleOAuthUrl = async (req, res) => {
-    try {
-        const { doctorId } = req.body
-        if (!doctorId) return res.json({ success: false, message: 'Doctor ID is required' })
-        
-        const doctor = await doctorModel.findById(doctorId)
-        if (!doctor) return res.json({ success: false, message: 'Doctor not found' })
-        
-        // Import required modules
-        const { google } = await import('googleapis')
-        const jwt = await import('jsonwebtoken')
-        
-        // Get OAuth2 client
-        const clientId = process.env.GOOGLE_CLIENT_ID
-        const clientSecret = process.env.GOOGLE_CLIENT_SECRET
-        const redirectUri = process.env.GOOGLE_REDIRECT_URI
-        
-        if (!clientId || !redirectUri) {
-            const missing = [
-                !clientId ? 'GOOGLE_CLIENT_ID' : null,
-                !redirectUri ? 'GOOGLE_REDIRECT_URI' : null
-            ].filter(Boolean).join(', ')
-            return res.status(500).json({ success: false, message: `Missing required Google OAuth env: ${missing}` })
-        }
-        
-        if (!clientSecret || String(clientSecret).trim().length === 0) {
-            return res.status(500).json({ success: false, message: 'Missing GOOGLE_CLIENT_SECRET. Set it in backend/.env for OAuth to work.' })
-        }
-        
-        const oAuth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUri)
-        
-        // Request both scopes so we can always update Calendar events even when using Tasks mode
-        const scopes = [
-            'https://www.googleapis.com/auth/tasks',
-            'https://www.googleapis.com/auth/calendar.events'
-        ]
-        
-        // Build a return URL; prefer explicit client-provided, else env/admin origin fallback
-        const adminBase = process.env.ADMIN_APP_URL || 'http://localhost:5174'
-        const returnTo = `${adminBase.replace(/\/$/, '')}/doctor-profile/${doctorId}?google=connected`
-        
-        // Sign the requesting doctor id and return URL into OAuth state so callback can identify without auth header
-        const stateToken = jwt.default.sign({ docId: doctorId, returnTo }, process.env.JWT_SECRET, { expiresIn: '10m' })
-        const url = oAuth2Client.generateAuthUrl({ access_type: 'offline', scope: scopes, prompt: 'consent', state: stateToken })
-        
-        return res.json({ success: true, url })
-    } catch (e) {
-        console.log(e)
-        if (e?.code === 'ENV_MISSING') {
-            return res.status(500).json({ success: false, message: e.message })
-        }
-        return res.status(400).json({ success: false, message: e.message || 'invalid_request' })
-    }
-}
 // Admin API: hard delete an appointment (DB + Google + free slot)
 export const deleteAppointmentAdmin = async (req, res) => {
     try {
@@ -1225,5 +1170,3 @@ const deleteDoctor = async (req, res) => {
         return res.json({ success: false, message: error.message })
     }
 }
-
-
