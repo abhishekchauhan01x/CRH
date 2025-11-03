@@ -41,7 +41,7 @@ const App = () => {
         toast.error('Google Calendar connection failed')
       }
       // Mark that we should land on doctor profile after validation
-      try { sessionStorage.setItem('postGoogle', '1') } catch {}
+      try { sessionStorage.setItem('postGoogle', '1') } catch (e) { void e }
       // Navigate to doctor profile; remove query params
       navigate('/doctor-profile', { replace: true })
     }
@@ -56,13 +56,13 @@ const App = () => {
         const currentPath = location.pathname
         const params = new URLSearchParams(location.search)
         const hasGoogleParam = params.has('google') || params.has('error')
-        const postGoogle = (() => { try { return sessionStorage.getItem('postGoogle') === '1' } catch { return false } })()
+        const postGoogle = (() => { try { return sessionStorage.getItem('postGoogle') === '1' } catch (e) { void e; return false } })()
         if (hasGoogleParam || postGoogle) {
           // Prioritize post-OAuth landing: show doctor UI and go to profile
           setIsDoctor(true)
           setIsAdmin(false)
           navigate('/doctor-profile', { replace: true })
-          try { sessionStorage.removeItem('postGoogle') } catch {}
+          try { sessionStorage.removeItem('postGoogle') } catch (e) { void e }
           setIsValidating(false)
           return
         }
@@ -198,7 +198,7 @@ const App = () => {
       <div className='bg-[#F8F9FD] min-h-screen'>
         <ToastContainer/>
         <Navbar/>
-        <div className='flex h-[calc(100vh-64px)]'>
+        <div className='flex flex-col md:flex-row h-[calc(100vh-64px)]'>
           <Sidebar/>
           <div className='flex-1 overflow-auto scroll-smooth'>
             <Routes>
@@ -221,7 +221,7 @@ const App = () => {
       <div className='bg-[#F8F9FD] min-h-screen'>
         <ToastContainer/>
         <Navbar/>
-        <div className='flex h-[calc(100vh-64px)]'>
+        <div className='flex flex-col md:flex-row h-[calc(100vh-64px)]'>
           <Sidebar/>
           <div className='flex-1 overflow-auto scroll-smooth'>
             <Routes>

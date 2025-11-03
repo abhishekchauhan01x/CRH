@@ -45,35 +45,35 @@ const Sidebar = () => {
 
     if (userType === 'admin') {
         return (
-            <div className='h-full bg-white border-r border-gray-200 flex flex-col scroll-smooth w-16 md:w-72' >
-                <ul className='text-[#515151] mt-5 flex-1 flex flex-col'>
-                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}`} to={'/admin-dashboard'}>
+            <div className='bg-white border-t md:border-t-0 md:border-r border-gray-200 flex flex-row md:flex-col scroll-smooth w-full md:w-72 md:h-full overflow-x-auto'>
+                <ul className='text-[#515151] mt-0 md:mt-5 flex-1 flex flex-row md:flex-col'>
+                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-4 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] md:border-r-4 md:border-primary' : ''}`} to={'/admin-dashboard'}>
                         <img src={assets.home_icon} alt="" />
                         <p className='hidden md:block'>Dashboard</p>
                     </NavLink>
 
-                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}`} to={'/all-appointments'}>
+                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-4 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] md:border-r-4 md:border-primary' : ''}`} to={'/all-appointments'}>
                         <img src={assets.appointment_icon} alt="" />
                         <p className='hidden md:block'>Appointments</p>
                     </NavLink>
 
-                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}`} to={'/add-doctor'}>
+                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-4 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] md:border-r-4 md:border-primary' : ''}`} to={'/add-doctor'}>
                         <img src={assets.add_icon} alt="" />
                         <p className='hidden md:block'>Add Doctor</p>
                     </NavLink>
 
-                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}`} to={'/doctor-list'}>
+                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-4 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] md:border-r-4 md:border-primary' : ''}`} to={'/doctor-list'}>
                         <img src={assets.people_icon} alt="" />
                         <p className='hidden md:block'>Doctors List</p>
                     </NavLink>
 
-                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}`} to={'/patients'}>
+                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-4 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] md:border-r-4 md:border-primary' : ''}`} to={'/patients'}>
                         <img src={assets.people_icon} alt="" />
                         <p className='hidden md:block'>Patients</p>
                     </NavLink>
 
                     {/* Spacer to push content to top */}
-                    <div className='flex-1'></div>
+                    <div className='hidden md:block flex-1'></div>
                 </ul>
             </div>
         )
@@ -81,25 +81,25 @@ const Sidebar = () => {
 
     if (userType === 'doctor') {
         return (
-            <div className='h-full bg-white border-r border-gray-200 flex flex-col scroll-smooth' >
-                <ul className='text-[#515151] mt-5 flex-1 flex flex-col'>
-                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}`} to={'/doctor-dashboard'}>
+            <div className='bg-white border-t md:border-t-0 md:border-r border-gray-200 flex flex-row md:flex-col scroll-smooth w-full md:w-auto md:h-full overflow-x-auto' >
+                <ul className='text-[#515151] mt-0 md:mt-5 flex-1 flex flex-row md:flex-col'>
+                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-4 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] md:border-r-4 md:border-primary' : ''}`} to={'/doctor-dashboard'}>
                         <img src={assets.home_icon} alt="" />
                         <p className='hidden md:block'>Dashboard</p>
                     </NavLink>
 
-                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}`} to={'/doctor-appointments'}>
+                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-4 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] md:border-r-4 md:border-primary' : ''}`} to={'/doctor-appointments'}>
                         <img src={assets.appointment_icon} alt="" />
                         <p className='hidden md:block'>Appointments</p>
                     </NavLink>
 
-                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-3 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] border-r-4 border-primary' : ''}`} to={'/doctor-profile'}>
+                    <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-4 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] md:border-r-4 md:border-primary' : ''}`} to={'/doctor-profile'}>
                         <img src={assets.people_icon} alt="" />
                         <p className='hidden md:block'>Profile</p>
                     </NavLink>
 
                     {/* Spacer to push content to top */}
-                    <div className='flex-1'></div>
+                    <div className='hidden md:block flex-1'></div>
                 </ul>
             </div>
         )
