@@ -30,13 +30,13 @@ const Navbar = () => {
 
 
     return (
-        <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-b-gray-400 w-full bg-white">
+        <div className="flex items-center justify-between text-xs sm:text-sm py-2 sm:py-3 md:py-4 mb-4 sm:mb-5 border-b border-b-gray-300 w-full bg-white px-3 sm:px-4 md:px-6">
             <NavLink to="/">
                 <div className="logo flex items-center cursor-pointer">
-                    <img className="w-36" src={assets.crhlogo} alt="CRH Logo" />
+                    <img className="w-24 sm:w-32 md:w-36 lg:w-40" src={assets.crhlogo} alt="CRH Logo" />
                 </div>
             </NavLink>
-            <ul className="hidden md:flex items-center gap-5 font-medium ">
+            <ul className="hidden md:flex items-center gap-4 lg:gap-5 font-medium ">
                 <NavLink to="/"
                     className={({ isActive }) =>
                         isActive ? 'border-b-2 border-[#1D8BCC] text-[#1D8BCC]' : 'hover:text-[#1D8BCC] transition-colors'
@@ -54,7 +54,7 @@ const Navbar = () => {
                     <hr className='border-none outline-none h-0.5 bg-[#1D8BCC] w-3/5 m-auto hidden' />
                 </NavLink>
             </ul>
-            <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-3 sm:gap-4'>
                 {
                     token && userData
                         ? <div
@@ -62,8 +62,8 @@ const Navbar = () => {
                             onClick={() => setShowDropdown((prev) => !prev)}
                             ref={dropdownRef}
                         >
-                            <img className="w-8 rounded-full" src={userData.image} alt="User Profile" />
-                            <img className="w-2.5" src={assets.dropdown_icon} alt="Dropdown Icon" />
+                            <img className="w-7 sm:w-8 rounded-full" src={userData.image} alt="User Profile" />
+                            <img className="w-2" src={assets.dropdown_icon} alt="Dropdown Icon" />
                             <div className={`absolute right-0 top-0 pt-14 text-base font-medium text-gray-600 z-20 ${showDropdown ? 'block' : 'hidden'} group-hover:block`}>
                                 <div className="min-w-48 bg-stone-100 rounded p-4 flex flex-col gap-4">
                                     <p onClick={() => { navigate('/my-profile'); setShowDropdown(false); }} className="hover:text-black cursor-pointer"> My Profile</p>
@@ -72,25 +72,25 @@ const Navbar = () => {
                                 </div>
                             </div>
                         </div>
-                        : <div className="flex items-center gap-3">
-                            <button onClick={() => navigate('/login')} className="primary text-white px-8 py-3 rounded-full font-light cursor-pointer hover:scale-105 transition-transform">
+                        : <div className="flex items-center gap-2 sm:gap-3">
+                            <button onClick={() => navigate('/login')} className="primary text-white px-4 py-2 text-xs sm:text-sm md:text-base md:px-6 md:py-2.5 lg:px-8 lg:py-3 rounded-full font-light cursor-pointer hover:scale-105 transition-transform">
                                 Create Account
                             </button>
                         </div>
                 }
-                <img onClick={() => setShowMenu(true)} className='w-6 md:hidden' src={assets.menu_icon} alt="" />
+                <img onClick={() => setShowMenu(true)} className='w-5 sm:w-6 md:hidden' src={assets.menu_icon} alt="" />
 
                 {/* {Mobile Menu} */}
                 <div className={`${showMenu ? 'fixed w-full' : 'h-0 w-0'} md:hidden right-0 top-0 bottom-0 z-20 overflow-hidden bg-white transition-all`}>
-                    <div className='flex items-center justify-between px-5 '>
+                    <div className='flex items-center justify-between px-4 py-2'>
                         <div className="logo flex items-center cursor-pointer">
-                            <img className="w-36" src={assets.crhlogo} alt="CRH Logo" />
+                            <img className="w-28 sm:w-32" src={assets.crhlogo} alt="CRH Logo" />
                         </div>
-                        <img onClick={() => setShowMenu(false)} className='w-8' src={assets.cross_icon} alt="" />
+                        <img onClick={() => setShowMenu(false)} className='w-7' src={assets.cross_icon} alt="" />
                     </div>
-                    <ul className='flex flex-col items-center gap-2  mt-5 px-5 text-lg font-medium'>
-                        <NavLink onClick={() => setShowMenu(false)} to='/'><p className='px-4 py-2 rounded inline-block'>HOME</p></NavLink>
-                        <NavLink onClick={() => setShowMenu(false)} to='/doctors'><p className='px-4 py-2 rounded inline-block'>ALL DOCTORS</p></NavLink>
+                    <ul className='flex flex-col items-center gap-2 mt-4 px-4 text-base font-medium'>
+                        <NavLink onClick={() => setShowMenu(false)} to='/'><p className='px-3 py-2 rounded inline-block'>HOME</p></NavLink>
+                        <NavLink onClick={() => setShowMenu(false)} to='/doctors'><p className='px-3 py-2 rounded inline-block'>ALL DOCTORS</p></NavLink>
                     </ul>
                 </div>
             </div>
