@@ -3,7 +3,6 @@ import { DoctorContext } from '../../context/DoctorContext'
 import { AppContext } from '../../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-updates
 const DoctorProfile = () => {
 
   const { dToken, profileData, setProfileData, getProfileData, backendUrl } = useContext(DoctorContext)
