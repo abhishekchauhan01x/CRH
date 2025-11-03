@@ -276,9 +276,9 @@ const DoctorProfile = () => {
                 </div>
               ) : (
                 <>
-                  <h2 className='text-3xl font-bold text-gray-800 mb-2'>Dr. {profileData.name?.replace(/^\s*(Dr\.?\s*)+/i,'').trim()}</h2>
-                  <p className='text-lg text-gray-600 mb-1'>{profileData.speciality}</p>
-                  <p className='text-gray-500'>{profileData.degree}</p>
+                  <h2 className='text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2'>Dr. {profileData.name?.replace(/^\s*(Dr\.\?\s*)+/i,'').trim()}</h2>
+                  <p className='text-base sm:text-lg text-gray-600 mb-0.5 sm:mb-1'>{profileData.speciality}</p>
+                  <p className='text-sm sm:text-base text-gray-500'>{profileData.degree}</p>
                 </>
               )}
             </div>
@@ -355,7 +355,9 @@ const DoctorProfile = () => {
                   placeholder='Enter doctor description and background...'
                 />
               ) : (
-                <p className='text-gray-600'>{profileData.about}</p>
+                <p className='text-gray-600 leading-relaxed break-words whitespace-pre-line'>
+                  {profileData.about}
+                </p>
               )}
             </div>
 
