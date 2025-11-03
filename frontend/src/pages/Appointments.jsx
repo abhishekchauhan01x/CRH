@@ -306,7 +306,7 @@ const Appointments = () => {
                         <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4 flex-wrap">
                             <div className="min-w-0">
                                 <div className="relative">
-                                    <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 whitespace-normal break-words max-w-full pr-6 sm:pr-7 md:pr-8">
+                                    <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 whitespace-normal break-words max-w-full pr-6 sm:pr-7 md:pr-8"></h1>
                                         {docInfo.name}
                                     </h1>
                                     <img className="w-4 sm:w-5 absolute right-0 top-0" src={assets.verified_icon} alt="Verified" />
@@ -367,7 +367,7 @@ const Appointments = () => {
                                 return (
                                     <div
                                         onClick={() => setSlotIndex(index)}
-                                        className={`text-center py-6 min-w-16 rounded-full cursor-pointer ${
+                                        className={`text-center py-3 sm:py-4 md:py-6 min-w-12 sm:min-w-14 md:min-w-16 rounded-full cursor-pointer text-xs sm:text-sm ${
                                             slotIndex === index ? 'bg-primary text-white' : 'border border-gray-200'
                                         }`}
                                         key={index}
@@ -380,7 +380,7 @@ const Appointments = () => {
                                 return (
                                     <div
                                         onClick={() => setSlotIndex(index)}
-                                        className={`text-center py-6 min-w-16 rounded-full cursor-pointer ${
+                                        className={`text-center py-3 sm:py-4 md:py-6 min-w-12 sm:min-w-14 md:min-w-16 rounded-full cursor-pointer text-xs sm:text-sm ${
                                             slotIndex === index ? 'bg-primary text-white' : 'border border-gray-200'
                                         }`}
                                         key={index}
@@ -393,12 +393,12 @@ const Appointments = () => {
                                 // Show "Not Available" for days when doctor is not available
                                 return (
                                     <div
-                                        className="text-center py-6 min-w-16 rounded-full border border-gray-200 bg-gray-100 cursor-not-allowed"
+                                        className="text-center py-3 sm:py-4 md:py-6 min-w-12 sm:min-w-14 md:min-w-16 rounded-full border border-gray-200 bg-gray-100 cursor-not-allowed text-xs sm:text-sm"
                                         key={index}
                                     >
                                         <p className="text-gray-500">{daysOfWeek[slotDate.getDay()]}</p>
                                         <p className="text-gray-500">{slotDate.getDate()}</p>
-                                        <p className="text-xs text-red-500 mt-1">Not Available</p>
+                                        <p className="text-[10px] sm:text-xs text-red-500 mt-1">Not Available</p>
                                     </div>
                                 );
                             } else {
