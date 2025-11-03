@@ -54,6 +54,14 @@ const App = () => {
         const currentPath = location.pathname
         const params = new URLSearchParams(location.search)
         const hasGoogleParam = params.has('google') || params.has('error')
+        if (hasGoogleParam) {
+          // Prioritize post-OAuth landing: show doctor UI and go to profile
+          setIsDoctor(true)
+          setIsAdmin(false)
+          navigate('/doctor-profile', { replace: true })
+          setIsValidating(false)
+          return
+        }
         
         // Define route patterns
         const adminRoutes = ['/admin-dashboard', '/all-appointments', '/add-doctor', '/doctor-list', '/patients', '/user-profile']
@@ -111,15 +119,6 @@ const App = () => {
         }
         */
         
-        // If returning from Google OAuth, force route to doctor profile first
-        if (hasGoogleParam) {
-          setIsDoctor(true)
-          setIsAdmin(false)
-          navigate('/doctor-profile', { replace: true })
-          setIsValidating(false)
-          return
-        }
-
         // Determine which interface to show based on route and valid tokens
         if (isDoctorRoute && doctorValid) {
           // User is on a doctor route with valid doctor token
