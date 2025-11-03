@@ -306,7 +306,7 @@ const Appointments = () => {
                         <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4 flex-wrap">
                             <div className="min-w-0">
                                 <div className="relative">
-                                    <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 whitespace-normal break-words max-w-full pr-6 sm:pr-7 md:pr-8"></h1>
+                                    <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 whitespace-normal break-words max-w-full pr-6 sm:pr-7 md:pr-8">
                                         {docInfo.name}
                                     </h1>
                                     <img className="w-4 sm:w-5 absolute right-0 top-0" src={assets.verified_icon} alt="Verified" />
