@@ -32,9 +32,15 @@ const App = () => {
   // Handle post-OAuth redirect marker and route to doctor profile
   useEffect(() => {
     const params = new URLSearchParams(location.search)
-    const google = params.get('google')
-    if (google === 'connected') {
-      // Navigate to doctor profile; remove the marker param
+    const google = params.get('google') // e.g., 'connected' or 'failed'
+    const oauthError = params.get('error') // some providers add error param
+    if (google || oauthError) {
+      if (google === 'connected' && !oauthError) {
+        toast.success('Google Calendar connected')
+      } else {
+        toast.error('Google Calendar connection failed')
+      }
+      // Navigate to doctor profile; remove query params
       navigate('/doctor-profile', { replace: true })
     }
   }, [location.search, navigate])
