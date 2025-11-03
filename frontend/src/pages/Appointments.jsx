@@ -305,10 +305,12 @@ const Appointments = () => {
                     <div className="flex-1 min-w-0 border border-gray-400 rounded-lg p-5 sm:p-6 md:p-8 bg-white mx-2 sm:mx-0 mt-[-80px] sm:mt-0">
                         <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4 flex-wrap">
                             <div className="min-w-0">
-                                <p className="flex items-start sm:items-center gap-2 text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 flex-wrap">
-                                    <span className="whitespace-normal md:whitespace-nowrap break-words max-w-full">{docInfo.name}</span>
-                                    <img className="w-4 sm:w-5 flex-shrink-0" src={assets.verified_icon} alt="Verified" />
-                                </p>
+                                <div className="relative">
+                                    <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 whitespace-normal break-words max-w-full pr-6 sm:pr-7 md:pr-8">
+                                        {docInfo.name}
+                                    </h1>
+                                    <img className="w-4 sm:w-5 absolute right-0 top-0" src={assets.verified_icon} alt="Verified" />
+                                </div>
                                 <div className="flex items-center gap-2 text-xs sm:text-sm mt-1 text-gray-600 flex-wrap">
                                     <p>
                                         {docInfo.degree} - {docInfo.speciality}
