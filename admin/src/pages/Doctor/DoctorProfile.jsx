@@ -109,6 +109,31 @@ const DoctorProfile = () => {
     }
   }
 
+  const disconnectGoogleCalendar = async () => {
+    try {
+      // Prefer a dedicated disconnect endpoint if available
+      let response
+      try {
+        response = await axios.post(`${backendUrl}/api/doctor/google/disconnect`, {}, { headers: { dToken } })
+      } catch (err) {
+        // Fallback to cleanup if disconnect route is not available
+        if (err?.response?.status === 404) {
+          response = await axios.post(`${backendUrl}/api/doctor/google/cleanup`, {}, { headers: { dToken } })
+        } else {
+          throw err
+        }
+      }
+
+      if (response?.data?.success) {
+        toast.success(response.data.message || 'Google Calendar disconnected')
+      } else {
+        toast.error(response?.data?.message || 'Failed to disconnect Google Calendar')
+      }
+    } catch (e) {
+      toast.error(e.message || 'Failed to disconnect Google Calendar')
+    }
+  }
+
   const handleShowResetInput = () => setShowResetInput(true)
   const handleResetPassword = async () => {
     try {
@@ -178,6 +203,7 @@ const DoctorProfile = () => {
         <button onClick={connectGoogleCalendar} className='bg-red-500 text-white px-3 py-1.5 rounded-md text-sm hover:bg-red-600 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base cursor-pointer'>Connect Google Calendar</button>
         <button onClick={syncGoogleCalendar} className='bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-300 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base cursor-pointer'>Sync Now</button>
         <button onClick={cleanupGoogle} className='bg-amber-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-amber-700 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base cursor-pointer'>Clean up Google</button>
+        <button onClick={disconnectGoogleCalendar} className='bg-gray-700 text-white px-3 py-1.5 rounded-md text-sm hover:bg-gray-800 transition-colors md:px-4 md:py-2 md:rounded-lg md:text-base cursor-pointer'>Disconnect Google Calendar</button>
       </div>
 
       {/* Profile Card */}
