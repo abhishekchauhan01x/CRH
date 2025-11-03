@@ -293,34 +293,34 @@ const Appointments = () => {
         docInfo && (
             <div className="px-4 sm:px-6 md:px-10 lg:px-16">
                 {/* Doctor Details */}
-                <div className="flex flex-col sm:flex-row gap-4 ">
+                <div className="flex flex-col sm:flex-row gap-4 items-start">
                     <div>
                         <img
-                            className="bg-primary w-full sm:max-w-72 rounded-lg" src={docInfo.image}
+                            className="bg-primary w-full sm:max-w-72 rounded-lg object-cover"
                             alt={`${docInfo.name} profile`}
                         />
                     </div>
 
-                    <div className="flex-1 border border-gray-400 rounded-lg p-8 py-7 bg-white mx-2 sm:mx-0 mt-[-80px]  sm:mt-0">
-                        <div className="flex items-center justify-between gap-4">
-                            <div>
-                                <p className="flex items-center gap-2 text-2xl font-medium text-gray-900">
-                                    {docInfo.name}
-                                    <img className="w-5" src={assets.verified_icon} alt="Verified" />
+                    <div className="flex-1 min-w-0 border border-gray-400 rounded-lg p-5 sm:p-6 md:p-8 bg-white mx-2 sm:mx-0 mt-[-80px] sm:mt-0">
+                        <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4 flex-wrap">
+                            <div className="min-w-0">
+                                <p className="flex items-center gap-2 text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 truncate">
+                                    <span className="truncate">{docInfo.name}</span>
+                                    <img className="w-4 sm:w-5" src={assets.verified_icon} alt="Verified" />
                                 </p>
-                                <div className="flex items-center gap-2 text-sm mt-1 text-gray-600">
+                                <div className="flex items-center gap-2 text-xs sm:text-sm mt-1 text-gray-600 flex-wrap">
                                     <p>
                                         {docInfo.degree} - {docInfo.speciality}
                                     </p>
-                                    <button className="py-0.5 px-2 border text-xs rounded-full">
+                                    <button className="py-0.5 px-2 border text-[10px] sm:text-xs rounded-full whitespace-nowrap">
                                         {docInfo.experience}
                                     </button>
                                 </div>
                             </div>
-                            <div className="shrink-0">
+                            <div className="w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
                                 <button
                                     onClick={openWhatsApp}
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded border border-emerald-500 text-emerald-600 hover:bg-emerald-50 text-sm"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded border border-emerald-500 text-emerald-600 hover:bg-emerald-50 text-xs sm:text-sm whitespace-nowrap w-full sm:w-auto justify-center"
                                     title="Chat on WhatsApp"
                                 >
                                     Chat on WhatsApp
@@ -328,14 +328,14 @@ const Appointments = () => {
                             </div>
                         </div>
                         <div>
-                            <p className="flex items-center gap-1 text-sm font-medium text-gray-900 mt-3">
+                            <p className="flex items-center gap-1 text-sm sm:text-base font-medium text-gray-900 mt-3">
                                 About <img className="w-4 sm:w-5" src={assets.info_icon} alt="Info" />
                             </p>
-                            <p className="text-sm text-gray-500 max-w-[700px] mt-1">
+                            <p className="text-sm sm:text-base leading-6 sm:leading-7 text-gray-600 mt-1 break-words">
                                 {docInfo.about}
                             </p>
                         </div>
-                        <p className="text-gray-500 font-medium mt-4">
+                        <p className="text-gray-600 font-medium mt-4">
                             Appointment fee: <span className="text-gray-600">{currenySymbol}{docInfo.fees}</span>
                         </p>
                     </div>
