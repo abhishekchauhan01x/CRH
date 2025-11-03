@@ -24,7 +24,7 @@ const TopDoctors = () => {
                         key={index}>
                         <div className="relative w-full h-56 sm:h-60 md:h-64 lg:h-72 bg-blue-50 overflow-hidden">
                             <img 
-                                className="w-full h-full object-cover object-center md:hover:scale-105 transition-transform duration-300"  
+                                className="w-full h-full object-cover object-center transform translate-y-[2px] md:hover:scale-105 transition-transform duration-300"  
                                 src={item.image} 
                                 alt={`${item.name} profile`}
                                 loading="lazy"
