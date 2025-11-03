@@ -5,20 +5,15 @@ import { AppContext } from '../context/AppContext';
 const Doctors = () => {
   const { speciality } = useParams();
   const [filterDoc, setFilterDoc] = useState([]);
-  const [showfilter, setShowfilter] = useState(false);
   const navigate = useNavigate();
   const { doctors } = useContext(AppContext);
 
-  const applyFilter = () => {
+  useEffect(() => {
     if (speciality) {
       setFilterDoc(doctors.filter((doc) => doc.speciality === speciality));
     } else {
       setFilterDoc(doctors);
     }
-  };
-
-  useEffect(() => {
-    applyFilter();
   }, [doctors, speciality]);
 
   return (
@@ -41,7 +36,7 @@ const Doctors = () => {
             >
               <div className="relative w-full h-40 sm:h-48 md:h-56 lg:h-60 bg-blue-50 overflow-hidden">
                 <img 
-                  className="w-full h-full object-contain md:object-cover object-center p-3 sm:p-4 md:p-0 md:hover:scale-105 transition-transform duration-300" 
+                  className="w-full h-full object-contain md:object-cover object-center p-3 sm:p-4 md:p-0 transform translate-y-[2px] sm:translate-y-0 md:hover:scale-105 transition-transform duration-300" 
                   src={item.image} 
                   alt={`${item.name} profile`}
                   onError={(e) => {

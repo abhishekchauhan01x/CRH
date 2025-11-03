@@ -1,4 +1,4 @@
-import React, { useContext, lazy, Suspense } from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 
@@ -24,7 +24,7 @@ const TopDoctors = () => {
                         key={index}>
                         <div className="relative w-full h-56 sm:h-60 md:h-64 lg:h-72 bg-blue-50 overflow-hidden">
                             <img 
-                                className="w-full h-full object-cover object-center transform translate-y-[2px] md:hover:scale-105 transition-transform duration-300"  
+                                className="w-full h-full object-cover object-center transform translate-y-[2px] sm:translate-y-0 md:hover:scale-105 transition-transform duration-300"  
                                 src={item.image} 
                                 alt={`${item.name} profile`}
                                 loading="lazy"
