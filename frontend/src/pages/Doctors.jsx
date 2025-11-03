@@ -54,8 +54,8 @@ const Doctors = () => {
                     <p className={`w-2 h-2 ${item.available ? 'bg-green-500' : 'bg-gray-400'} rounded-full`}></p>
                     <p className="whitespace-nowrap">{item.available ? 'Available' : 'Not Available'}</p>
                   </div>
-                  <p className="text-gray-900 text-sm sm:text-base font-semibold mb-0.5 line-clamp-2">{item.name}</p>
-                  <p className="text-gray-600 text-xs">{item.speciality}</p>
+                <p className="text-gray-900 text-sm sm:text-base font-semibold mb-0.5 line-clamp-2">{item.name}</p>
+                <p className="text-gray-600 text-xs">{item.speciality}</p>
               </div>
             </div>
           ))}
