@@ -25,9 +25,8 @@ const Login = () => {
         try {
 
             if (state === 'Admin') {
-
-                const base = backendUrl && typeof backendUrl === 'string' ? backendUrl.replace(/\/$/, '') : ''
-                const { data } = await axios.post(`${base}/api/admin/login`, { email, password })
+                const baseUrl = backendUrl?.trim().replace(/\/+$/, '') || 'https://crh-2.onrender.com'
+                const { data } = await axios.post(`${baseUrl}/api/admin/login`, { email, password })
                 if (data.success) {
                     sessionStorage.setItem('aToken', data.token)
                     setAToken(data.token);
@@ -38,9 +37,8 @@ const Login = () => {
                 }
 
             } else {
-
-                const base = backendUrl && typeof backendUrl === 'string' ? backendUrl.replace(/\/$/, '') : ''
-                const { data } = await axios.post(`${base}/api/doctor/login`, { email, password })
+                const baseUrl = backendUrl?.trim().replace(/\/+$/, '') || 'https://crh-2.onrender.com'
+                const { data } = await axios.post(`${baseUrl}/api/doctor/login`, { email, password })
                 if (data.success) {
                     sessionStorage.setItem('dToken', data.token)
                     setDToken(data.token);
