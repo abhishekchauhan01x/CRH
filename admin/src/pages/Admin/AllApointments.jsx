@@ -785,20 +785,24 @@ const handleDeleteDocument = async (documentId, documentName) => {
       {/* Statistics Cards */}
       <div className='grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6'>
         <div className='bg-white p-4 rounded-lg border border-gray-200'>
-          <div className='flex items-center gap-3'>
-            <img className='w-8 h-8' src={assets.patients_icon} alt="Total Patients" />
-            <div>
-              <p className='text-2xl font-bold text-gray-800'>{patients && Array.isArray(patients) ? patients.length : 0}</p>
-              <p className='text-gray-600 text-sm'>Total Patients</p>
+          <div className='flex items-center gap-2 sm:gap-3'>
+            <div className='flex-shrink-0'>
+              <img className='w-10 h-10 sm:w-12 sm:h-12 object-contain' src={assets.patients_icon} alt="Total Patients" />
+            </div>
+            <div className='min-w-0 flex-1'>
+              <p className='text-xl sm:text-2xl font-bold text-gray-800'>{patients && Array.isArray(patients) ? patients.length : 0}</p>
+              <p className='text-xs sm:text-sm text-gray-600'>Total Patients</p>
             </div>
           </div>
         </div>
 
         <div className='bg-white p-4 rounded-lg border border-gray-200'>
-          <div className='flex items-center gap-3'>
-            <img className='w-8 h-8' src={assets.appointment_icon} alt="Total Appointments" />
-            <div>
-              <p className='text-2xl font-bold text-green-600'>
+          <div className='flex items-center gap-2 sm:gap-3'>
+            <div className='flex-shrink-0'>
+              <img className='w-10 h-10 sm:w-12 sm:h-12 object-contain' src={assets.appointment_icon} alt="Total Appointments" />
+            </div>
+            <div className='min-w-0 flex-1'>
+              <p className='text-xl sm:text-2xl font-bold text-green-600'>
                 {(() => {
                   let totalAppointments = 0;
                   if (patients && Array.isArray(patients)) {
@@ -811,10 +815,10 @@ const handleDeleteDocument = async (documentId, documentName) => {
                   return totalAppointments;
                 })()}
               </p>
-              <p className='text-gray-600 text-sm'>Total Appointments</p>
-              <p className='text-xs text-gray-400'>All scheduled appointments</p>
+              <p className='text-xs sm:text-sm text-gray-600'>Total Appointments</p>
+              <p className='text-[10px] sm:text-xs text-gray-400'>All scheduled appointments</p>
               {/* Completed / Upcoming breakdown */}
-              <div className='mt-2 flex gap-4 text-sm'>
+              <div className='mt-2 flex gap-2 sm:gap-4 text-xs sm:text-sm'>
                 <span className='inline-flex items-center gap-1 text-green-700'>
                   <span className='w-2 h-2 rounded-full bg-green-500'></span>
                   Completed: {(() => {
@@ -861,10 +865,12 @@ const handleDeleteDocument = async (documentId, documentName) => {
         </div>
 
         <div className='bg-white p-4 rounded-lg border border-gray-200'>
-          <div className='flex items-center gap-3'>
-            <img className='w-8 h-8' src={assets.appointment_icon} alt="New This Month" />
-            <div>
-              <p className='text-2xl font-bold text-blue-600'>
+          <div className='flex items-center gap-2 sm:gap-3'>
+            <div className='flex-shrink-0'>
+              <img className='w-10 h-10 sm:w-12 sm:h-12 object-contain' src={assets.appointment_icon} alt="New This Month" />
+            </div>
+            <div className='min-w-0 flex-1'>
+              <p className='text-xl sm:text-2xl font-bold text-blue-600'>
                 {patients && Array.isArray(patients) ? patients.filter(p => {
                   if (!p || !patientAppointments[p._id]?.lastAppointment) return false
                   const monthAgo = new Date()
@@ -879,8 +885,8 @@ const handleDeleteDocument = async (documentId, documentName) => {
                   }
                 }).length : 0}
               </p>
-              <p className='text-gray-600 text-sm'>New This Month</p>
-              <p className='text-xs text-gray-400'>Based on appointment dates</p>
+              <p className='text-xs sm:text-sm text-gray-600'>New This Month</p>
+              <p className='text-[10px] sm:text-xs text-gray-400'>Based on appointment dates</p>
             </div>
           </div>
         </div>
