@@ -59,7 +59,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Handle preflight OPTIONS requests
+// Handle preflight OPTIONS requests - CORS middleware already handles this
 
 // api endpoints
 app.use('/api/admin',adminRouter)
