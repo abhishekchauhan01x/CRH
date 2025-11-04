@@ -412,7 +412,11 @@ const DoctorProfile = () => {
           <div>
             <label className='block text-sm text-gray-700 mb-1'>Password</label>
             <div className='relative'>
-              <input type={showPassword ? 'text' : 'password'} disabled value={'********'} className='px-3 py-2 bg-gray-50 border rounded w-full'/>
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                disabled 
+                value={tempPassword || profileData?.password || '********'} 
+                className='px-3 py-2 bg-gray-50 border rounded w-full'/>
               <button onClick={()=>setShowPassword(p=>!p)} type='button' className='absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 rounded'>
                 <img
                   src={showPassword ? '/eyecross.png' : '/eye.png'}
