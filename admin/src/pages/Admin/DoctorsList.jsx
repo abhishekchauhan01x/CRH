@@ -28,9 +28,9 @@ const doctorsList = () => {
               className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 bg-white"
               key={index}
             >
-              <div className="relative w-full h-72 bg-blue-50 overflow-hidden">
+              <div className="relative w-full h-60 sm:h-72 bg-blue-50 overflow-hidden">
                 <img 
-                  className="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300" 
+                  className="w-full h-full object-cover object-top sm:object-center transform translate-y-[6px] sm:translate-y-0 hover:scale-105 transition-transform duration-300" 
                   src={item.image} 
                   alt={`${item.name} profile`}
                   onError={(e) => {
