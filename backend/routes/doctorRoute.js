@@ -1,5 +1,5 @@
 import express from 'express'
-import { appointmentCancel, appointmentComplete, appointmentsdoctor, doctorDashboard, doctorList, doctorProfile, loginDoctor, updateDoctorProfile, googleOAuthUrl, googleOAuthCallback, syncAppointmentsToGoogle, cleanupGoogleForDoctor, debugGoogleConfig, googleOAuthUrlDebug, googleDisconnect } from '../controllers/doctorController.js'
+import { appointmentCancel, appointmentComplete, appointmentsdoctor, doctorDashboard, doctorList, doctorProfile, loginDoctor, updateDoctorProfile, resetDoctorPassword, googleOAuthUrl, googleOAuthCallback, syncAppointmentsToGoogle, cleanupGoogleForDoctor, debugGoogleConfig, googleOAuthUrlDebug, googleDisconnect } from '../controllers/doctorController.js'
 import authDoctor from '../middlewares/authDoctor.js'
 
 const doctorRouter = express.Router()
@@ -12,6 +12,7 @@ doctorRouter.post('/cancel-appointment', authDoctor,appointmentCancel)
 doctorRouter.get('/dashboard', authDoctor,doctorDashboard)
 doctorRouter.get('/profile', authDoctor,doctorProfile)
 doctorRouter.post('/update-profile', authDoctor,updateDoctorProfile)
+doctorRouter.post('/reset-password', authDoctor, resetDoctorPassword)
 // Google Calendar integration
 doctorRouter.get('/google/auth-url', authDoctor, googleOAuthUrl)
 doctorRouter.get('/google/callback', googleOAuthCallback)

@@ -569,6 +569,42 @@ const updateDoctorProfile = async (req, res) => {
     }
 }
 
+// API to reset doctor password
+const resetDoctorPassword = async (req, res) => {
+    try {
+        const { newPassword } = req.body
+        const docId = req.doc?.id // From authDoctor middleware
+        
+        if (!docId) {
+            return res.json({ success: false, message: 'Doctor ID not found' })
+        }
+
+        if (!newPassword || String(newPassword).trim().length < 8) {
+            return res.json({ success: false, message: 'Password must be at least 8 characters long' })
+        }
+
+        const doctor = await doctorModel.findById(docId)
+        if (!doctor) {
+            return res.json({ success: false, message: 'Doctor not found' })
+        }
+
+        const cleanPassword = String(newPassword).trim()
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(cleanPassword, salt)
+
+        doctor.password = hashedPassword
+        doctor.originalPassword = cleanPassword // Store the original password for viewing
+        await doctor.save()
+
+        console.log(`Password reset for doctor ${doctor.name} (${doctor.email})`)
+
+        res.json({ success: true, message: 'Password reset successfully', tempPassword: cleanPassword })
+    } catch (error) {
+        console.log(error)
+        res.json({ success: false, message: error.message })
+    }
+}
+
 // API to get doctor list for frontend
 const doctorList = async (req, res) => {
     try {
@@ -972,6 +1008,7 @@ export {
     doctorDashboard,
     doctorProfile,
     updateDoctorProfile,
+    resetDoctorPassword,
     doctorList,
     googleOAuthUrl,
     googleOAuthCallback,

@@ -144,14 +144,16 @@ const DoctorProfile = () => {
       }
       const { data } = await axios.post(`${backendUrl}/api/doctor/reset-password`, { newPassword: newPass }, { headers: { dToken } })
       if (data.success) {
-        toast.success('Password updated')
-        setTempPassword(newPass)
+        toast.success('Password updated successfully')
+        setTempPassword(data.tempPassword || newPass)
         setShowResetInput(false)
         setResetPasswordInput('')
       } else {
         toast.error(data.message || 'Failed to update password')
       }
-    } catch (e) { toast.error(e.message) }
+    } catch (e) { 
+      toast.error(e.response?.data?.message || e.message || 'Failed to reset password')
+    }
   }
 
   const handleImageChange = (e) => {
