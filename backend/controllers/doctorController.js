@@ -1001,6 +1001,7 @@ const googleDisconnect = async (req, res) => {
 
 // Export all functions at the end of the file
 export {
+    changeAvailablity,
     loginDoctor,
     appointmentsdoctor,
     appointmentComplete,
