@@ -63,12 +63,12 @@ const Sidebar = () => {
                     </NavLink>
 
                     <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-4 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] md:border-r-4 md:border-primary' : ''}`} to={'/doctor-list'}>
-                        <img src={assets.doctor_icon} alt="" />
+                        <img src={assets.people_icon} alt="" />
                         <p className='hidden md:block'>Doctors List</p>
                     </NavLink>
 
                     <NavLink className={({ isActive }) => `flex items-center gap-3 py-3.5 px-4 md:px-9 md:min-w-72 cursor-pointer ${isActive ? 'bg-[#F2F3FF] md:border-r-4 md:border-primary' : ''}`} to={'/patients'}>
-                        <img src={assets.people_icon} alt="" />
+                        <img src={assets.patient_icon} alt="" />
                         <p className='hidden md:block'>Patients</p>
                     </NavLink>
 
