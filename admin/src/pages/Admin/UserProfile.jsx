@@ -120,9 +120,9 @@ const UserProfile = () => {
 
   if (isLoading) {
     return (
-      <div className='m-5'>
-        <div className='bg-white rounded-lg p-8 text-center'>
-          <div className='text-gray-500'>Loading user profile...</div>
+      <div className='m-3 sm:m-5'>
+        <div className='bg-white rounded-lg p-6 sm:p-8 text-center'>
+          <div className='text-sm sm:text-base text-gray-500'>Loading user profile...</div>
         </div>
       </div>
     )
@@ -130,12 +130,12 @@ const UserProfile = () => {
 
   if (!patient) {
     return (
-      <div className='m-5'>
-        <div className='bg-white rounded-lg p-8 text-center'>
-          <div className='text-red-500 mb-4'>User not found</div>
+      <div className='m-3 sm:m-5'>
+        <div className='bg-white rounded-lg p-6 sm:p-8 text-center'>
+          <div className='text-sm sm:text-base text-red-500 mb-4'>User not found</div>
           <button
             onClick={() => navigate('/patients')}
-            className='bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg'
+            className='bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base'
           >
             Back to Patients
           </button>
@@ -145,30 +145,30 @@ const UserProfile = () => {
   }
 
   return (
-    <div className='m-5'>
+    <div className='m-3 sm:m-5'>
       {/* Header */}
-      <div className='flex items-center justify-between mb-6'>
-        <div className='flex items-center gap-4'>
+      <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-0'>
+        <div className='flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto'>
           <button
             onClick={() => navigate('/patients')}
-            className='bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2'
+            className='bg-gray-500 hover:bg-gray-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg flex items-center gap-2 text-sm sm:text-base'
           >
             <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
               <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
             </svg>
             Back to Patients
           </button>
-          <h1 className='text-2xl font-bold text-gray-800'>User Profile</h1>
+          <h1 className='text-xl sm:text-2xl font-bold text-gray-800'>User Profile</h1>
         </div>
       </div>
 
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6'>
         {/* User Information Card */}
         <div className='lg:col-span-1'>
-          <div className='bg-white rounded-lg border border-gray-200 p-6'>
-            <div className='text-center mb-6'>
+          <div className='bg-white rounded-lg border border-gray-200 p-4 sm:p-6'>
+            <div className='text-center mb-4 sm:mb-6'>
               <img 
-                className='w-24 h-24 rounded-full object-cover mx-auto mb-4' 
+                className='w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover mx-auto mb-3 sm:mb-4' 
                 src={patient.image} 
                 alt={patient.name || 'Patient'}
                 onError={(e) => {
@@ -176,39 +176,39 @@ const UserProfile = () => {
                   e.target.src = 'https://via.placeholder.com/96x96?text=' + initial
                 }}
               />
-              <h2 className='text-xl font-bold text-gray-800'>{patient.name || 'Unnamed Patient'}</h2>
-              <p className='text-gray-500'>Patient ID: {patient._id ? patient._id.slice(-8) : 'N/A'}</p>
+              <h2 className='text-lg sm:text-xl font-bold text-gray-800'>{patient.name || 'Unnamed Patient'}</h2>
+              <p className='text-sm sm:text-base text-gray-500'>Patient ID: {patient._id ? patient._id.slice(-8) : 'N/A'}</p>
             </div>
 
-            <div className='space-y-4'>
+            <div className='space-y-3 sm:space-y-4'>
               <div>
-                <label className='text-sm font-medium text-gray-500'>Email</label>
-                <p className='text-gray-900'>{patient.email || 'Not provided'}</p>
+                <label className='text-xs sm:text-sm font-medium text-gray-500'>Email</label>
+                <p className='text-sm sm:text-base text-gray-900 break-words'>{patient.email || 'Not provided'}</p>
               </div>
               
               <div>
-                <label className='text-sm font-medium text-gray-500'>Phone</label>
-                <p className='text-gray-900'>{patient.phone || 'Not provided'}</p>
+                <label className='text-xs sm:text-sm font-medium text-gray-500'>Phone</label>
+                <p className='text-sm sm:text-base text-gray-900'>{patient.phone || 'Not provided'}</p>
               </div>
               
               <div>
-                <label className='text-sm font-medium text-gray-500'>Date of Birth</label>
-                <p className='text-gray-900'>{patient.dob ? new Date(patient.dob).toLocaleDateString() : 'Not provided'}</p>
+                <label className='text-xs sm:text-sm font-medium text-gray-500'>Date of Birth</label>
+                <p className='text-sm sm:text-base text-gray-900'>{patient.dob ? new Date(patient.dob).toLocaleDateString() : 'Not provided'}</p>
               </div>
               
               <div>
-                <label className='text-sm font-medium text-gray-500'>Age</label>
-                <p className='text-gray-900'>{calculateAge(patient.dob)} years</p>
+                <label className='text-xs sm:text-sm font-medium text-gray-500'>Age</label>
+                <p className='text-sm sm:text-base text-gray-900'>{calculateAge(patient.dob)} years</p>
               </div>
               
               <div>
-                <label className='text-sm font-medium text-gray-500'>Gender</label>
-                <p className='text-gray-900'>{patient.gender || 'Not provided'}</p>
+                <label className='text-xs sm:text-sm font-medium text-gray-500'>Gender</label>
+                <p className='text-sm sm:text-base text-gray-900'>{patient.gender || 'Not provided'}</p>
               </div>
               
               <div>
-                <label className='text-sm font-medium text-gray-500'>Address</label>
-                <p className='text-gray-900'>
+                <label className='text-xs sm:text-sm font-medium text-gray-500'>Address</label>
+                <p className='text-sm sm:text-base text-gray-900 break-words'>
                   {patient.address && patient.address.line1 ? (
                     <>
                       {patient.address.line1}<br/>
@@ -219,8 +219,8 @@ const UserProfile = () => {
               </div>
               
               <div>
-                <label className='text-sm font-medium text-gray-500'>Registration Date</label>
-                <p className='text-gray-900'>{patient.date ? new Date(patient.date).toLocaleDateString() : 'Not available'}</p>
+                <label className='text-xs sm:text-sm font-medium text-gray-500'>Registration Date</label>
+                <p className='text-sm sm:text-base text-gray-900'>{patient.date ? new Date(patient.date).toLocaleDateString() : 'Not available'}</p>
               </div>
             </div>
           </div>
@@ -228,40 +228,40 @@ const UserProfile = () => {
 
         {/* Appointments Card */}
         <div className='lg:col-span-2'>
-          <div className='bg-white rounded-lg border border-gray-200 p-6'>
-            <h3 className='text-lg font-semibold text-gray-800 mb-4'>Appointment History</h3>
+          <div className='bg-white rounded-lg border border-gray-200 p-4 sm:p-6'>
+            <h3 className='text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4'>Appointment History</h3>
             
             {patientAppointments.length > 0 ? (
               <div className='space-y-3'>
                 {patientAppointments.map((appointment, index) => (
-                  <div key={appointment._id || index} className='border border-gray-200 rounded-lg p-4'>
-                    <div className='flex items-center justify-between'>
-                      <div className='flex items-center gap-3'>
+                  <div key={appointment._id || index} className='border border-gray-200 rounded-lg p-3 sm:p-4'>
+                    <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3'>
+                      <div className='flex items-center gap-2 sm:gap-3 w-full sm:w-auto'>
                         <img 
-                          className='w-12 h-12 rounded-full object-cover' 
+                          className='w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0' 
                           src={appointment.docData?.image} 
                           alt={appointment.docData?.name || 'Doctor'}
                           onError={(e) => {
                             e.target.src = 'https://via.placeholder.com/48x48?text=D'
                           }}
                         />
-                        <div>
-                          <p className='font-medium text-gray-900'>
+                        <div className='min-w-0 flex-1'>
+                          <p className='text-sm sm:text-base font-medium text-gray-900 truncate'>
                             Dr. {appointment.docData?.name || 'Unknown Doctor'}
                           </p>
-                          <p className='text-sm text-gray-600'>
+                          <p className='text-xs sm:text-sm text-gray-600'>
                             {appointment.docData?.speciality || 'General'}
                           </p>
                         </div>
                       </div>
-                      <div className='text-right'>
-                        <p className='text-sm font-medium text-gray-900'>
+                      <div className='text-left sm:text-right w-full sm:w-auto flex flex-col sm:flex-col gap-1'>
+                        <p className='text-xs sm:text-sm font-medium text-gray-900'>
                           {formatDate(appointment.slotDate)}
                         </p>
-                        <p className='text-sm text-gray-600'>
+                        <p className='text-xs sm:text-sm text-gray-600'>
                           {appointment.slotTime}
                         </p>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        <span className={`inline-flex px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full w-fit ${
                           appointment.cancelled 
                             ? 'bg-red-100 text-red-800' 
                             : appointment.isCompleted
@@ -281,7 +281,7 @@ const UserProfile = () => {
                 ))}
               </div>
             ) : (
-              <div className='text-center py-8 text-gray-500'>
+              <div className='text-center py-6 sm:py-8 text-sm sm:text-base text-gray-500'>
                 <p>No appointments found for this patient.</p>
               </div>
             )}
