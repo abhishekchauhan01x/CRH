@@ -81,7 +81,9 @@ const DoctorProfile = () => {
       }
       
       // Redirect back to the doctor profile page after Google OAuth
-      const appOrigin = window.location.origin
+      // Clean up origin to ensure no trailing dots or slashes
+      let appOrigin = window.location.origin
+      appOrigin = appOrigin.replace(/\.+$/, '').replace(/\/+$/, '')
       const returnTo = encodeURIComponent(`${appOrigin}/doctor-profile?google=connected`)
       const { data } = await axios.get(`${backendUrl}/api/doctor/google/auth-url?returnTo=${returnTo}`, { headers: { dToken } })
       if (data.success && data.url) {

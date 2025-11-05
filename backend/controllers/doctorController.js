@@ -630,13 +630,35 @@ const googleOAuthUrl = async (req, res) => {
             'https://www.googleapis.com/auth/calendar.events'
         ]
 
-        // Use the doctor's returnTo URL if available, otherwise fall back to admin base URL
+        // Use returnTo from request query parameter if provided, otherwise use stored or construct from admin base URL
         const doctor = await doctorModel.findById(docId)
         const adminBase = process.env.ADMIN_APP_URL || 'http://localhost:5174'
         
-        let returnTo = doctor?.googleReturnTo 
-            ? `${adminBase.replace(/\/$/, '')}/doctor-profile/${docId}?google=connected`
-            : `${adminBase.replace(/\/$/, '')}/doctor-profile?google=connected`
+        let returnTo = req.query.returnTo
+        
+        // If returnTo is provided, decode it and validate
+        if (returnTo) {
+            try {
+                returnTo = decodeURIComponent(returnTo)
+                // Validate it's a valid URL
+                new URL(returnTo)
+            } catch (e) {
+                console.error('Invalid returnTo URL:', returnTo)
+                returnTo = null
+            }
+        }
+        
+        // Fallback to stored returnTo or construct from admin base URL
+        if (!returnTo) {
+            returnTo = doctor?.googleReturnTo 
+                ? `${doctor.googleReturnTo}?google=connected`
+                : `${adminBase.replace(/\/$/, '')}/doctor-profile?google=connected`
+        } else {
+            // Ensure returnTo has the google=connected parameter
+            const url = new URL(returnTo)
+            url.searchParams.set('google', 'connected')
+            returnTo = url.toString()
+        }
 
         const stateToken = jwt.sign({ docId, returnTo }, process.env.JWT_SECRET)
         const url = oAuth2Client.generateAuthUrl({
@@ -693,8 +715,15 @@ const googleOAuthCallback = async (req, res) => {
         })
 
         // Redirect back to admin panel with success message
-        const redirectUrl = `${returnTo}&success=true`
-        res.redirect(redirectUrl)
+        try {
+            const redirectUrl = new URL(returnTo)
+            redirectUrl.searchParams.set('success', 'true')
+            res.redirect(redirectUrl.toString())
+        } catch (e) {
+            // If returnTo is not a valid URL, construct it properly
+            const separator = returnTo.includes('?') ? '&' : '?'
+            res.redirect(`${returnTo}${separator}success=true`)
+        }
     } catch (e) {
         console.error('Google OAuth callback failed:', e)
         res.status(500).json({ success: false, message: e.message })
