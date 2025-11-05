@@ -67,6 +67,12 @@ const DoctorProfile = () => {
 
   const connectGoogleCalendar = async () => {
     try {
+      // Check if Google Calendar is already connected
+      if (profileData?.googleRefreshToken) {
+        toast.info('Google Calendar is already connected!')
+        return
+      }
+
       // Use the hosted URL with doctor ID as the return URL
       const doctorId = profileData?._id;
       if (!doctorId) {
@@ -191,18 +197,30 @@ const DoctorProfile = () => {
     const error = searchParams.get('error')
 
     if (googleConnected === 'connected') {
+      // Refresh profile data to get updated Google connection status
+      getProfileData()
+      
+      // Show appropriate message based on connection status
       if (success === 'true') {
-        toast.success('Google Calendar connected successfully!')
-        // Refresh profile data to get updated Google connection status
-        getProfileData()
+        // Check if already connected (might be a reconnection)
+        if (profileData?.googleRefreshToken) {
+          toast.info('Google Calendar is already connected!')
+        } else {
+          toast.success('Google Calendar connected successfully!')
+        }
       } else if (error) {
         toast.error(`Failed to connect Google Calendar: ${error}`)
+      } else {
+        // If no success or error, check current status
+        if (profileData?.googleRefreshToken) {
+          toast.info('Google Calendar is already connected!')
+        }
       }
       
       // Clear query parameters
       navigate('/doctor-profile', { replace: true })
     }
-  }, [location.search, navigate, getProfileData])
+  }, [location.search, navigate, getProfileData, profileData?.googleRefreshToken])
 
   // Keep current time fresh so headers and calendar stay real-time
   useEffect(() => {
