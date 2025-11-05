@@ -122,26 +122,40 @@ const DoctorProfile = () => {
 
   const disconnectGoogleCalendar = async () => {
     try {
-      // Prefer a dedicated disconnect endpoint if available
-      let response
-      try {
-        response = await axios.post(`${backendUrl}/api/doctor/google/disconnect`, {}, { headers: { dToken } })
-      } catch (err) {
-        // Fallback to cleanup if disconnect route is not available
-        if (err?.response?.status === 404) {
-          response = await axios.post(`${backendUrl}/api/doctor/google/cleanup`, {}, { headers: { dToken } })
-        } else {
-          throw err
-        }
+      // Confirm before disconnecting
+      if (!window.confirm('Are you sure you want to disconnect Google Calendar? This will remove all tasks and events from your Google Calendar and disconnect the account.')) {
+        return
       }
 
+      // Call the disconnect endpoint which will cleanup tasks/events and remove the connection
+      const response = await axios.post(`${backendUrl}/api/doctor/google/disconnect`, {}, { headers: { dToken } })
+
       if (response?.data?.success) {
-        toast.success(response.data.message || 'Google Calendar disconnected')
+        toast.success(response.data.message || 'Google Calendar disconnected successfully')
+        // Refresh profile data to update the connection status
+        getProfileData()
       } else {
         toast.error(response?.data?.message || 'Failed to disconnect Google Calendar')
       }
     } catch (e) {
-      toast.error(e.message || 'Failed to disconnect Google Calendar')
+      // Handle 404 if endpoint doesn't exist, fallback to cleanup
+      if (e?.response?.status === 404) {
+        try {
+          const cleanupResponse = await axios.post(`${backendUrl}/api/doctor/google/cleanup`, {}, { headers: { dToken } })
+          if (cleanupResponse?.data?.success) {
+            // After cleanup, manually disconnect
+            await axios.post(`${backendUrl}/api/doctor/update-profile`, { googleRefreshToken: null }, { headers: { dToken } })
+            toast.success('Google Calendar disconnected and cleaned up')
+            getProfileData()
+          } else {
+            toast.error(cleanupResponse?.data?.message || 'Failed to cleanup Google Calendar')
+          }
+        } catch (cleanupErr) {
+          toast.error(cleanupErr.message || 'Failed to disconnect Google Calendar')
+        }
+      } else {
+        toast.error(e.response?.data?.message || e.message || 'Failed to disconnect Google Calendar')
+      }
     }
   }
 

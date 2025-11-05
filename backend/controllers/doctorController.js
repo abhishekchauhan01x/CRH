@@ -1016,14 +1016,90 @@ const googleOAuthUrlDebug = async (req, res) => {
     }
 }
 
-// Disconnect Google for the authenticated doctor (clear refresh token)
+// Disconnect Google for the authenticated doctor (cleanup tasks/events and clear refresh token)
 const googleDisconnect = async (req, res) => {
     try {
         const docId = req.doc?.id
         if (!docId) return res.status(401).json({ success: false, message: 'Unauthorized' })
-        await doctorModel.findByIdAndUpdate(docId, { googleRefreshToken: null })
-        return res.json({ success: true, message: 'Google disconnected. Please reconnect to grant required scopes.' })
+        
+        const doctor = await doctorModel.findById(docId)
+        if (!doctor) return res.json({ success: false, message: 'Doctor not found' })
+        if (!doctor.googleRefreshToken) return res.json({ success: false, message: 'Google not connected' })
+
+        const oAuth2Client = getOAuth2Client()
+        oAuth2Client.setCredentials({ refresh_token: doctor.googleRefreshToken })
+        let deletedTasks = 0
+        let deletedEvents = 0
+
+        // Clean up all Google Tasks created by our system
+        try {
+            const tasks = google.tasks({ version: 'v1', auth: oAuth2Client })
+            let pageToken
+            const titleMarker = 'Appointment with '
+            do {
+                const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 100, pageToken, showCompleted: true, showHidden: true })
+                const items = Array.isArray(list?.data?.items) ? list.data.items : []
+                for (const t of items) {
+                    if (!t?.id) continue
+                    const titleMatch = typeof t.title === 'string' && t.title.includes(titleMarker)
+                    const notes = String(t.notes || '')
+                    const notesMatch = notes.includes(`Doctor: ${doctor.name}`) || notes.includes('Doctor: ')
+                    if (titleMatch && notesMatch) {
+                        try { 
+                            await tasks.tasks.delete({ tasklist: '@default', task: t.id })
+                            deletedTasks++ 
+                        } catch (e) {
+                            console.log('Failed to delete task:', e.message)
+                        }
+                    }
+                }
+                pageToken = list?.data?.nextPageToken
+            } while (pageToken)
+        } catch (e) {
+            console.log('Tasks cleanup error (non-fatal):', e.message)
+        }
+
+        // Clean up all Calendar events created by our system
+        try {
+            const calendar = google.calendar({ version: 'v3', auth: oAuth2Client })
+            const q = 'Appointment with '
+            const now = new Date()
+            const timeMin = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate()).toISOString()
+            const timeMax = new Date(now.getFullYear() + 5, now.getMonth(), now.getDate()).toISOString()
+            let pageToken
+            do {
+                const list = await calendar.events.list({ calendarId: 'primary', q, timeMin, timeMax, maxResults: 2500, singleEvents: true, pageToken })
+                const items = Array.isArray(list?.data?.items) ? list.data.items : []
+                for (const e of items) {
+                    if (!e?.id) continue
+                    const title = String(e.summary || '')
+                    if (title.includes(q)) {
+                        try { 
+                            await calendar.events.delete({ calendarId: 'primary', eventId: e.id })
+                            deletedEvents++ 
+                        } catch (e) {
+                            console.log('Failed to delete event:', e.message)
+                        }
+                    }
+                }
+                pageToken = list?.data?.nextPageToken
+            } while (pageToken)
+        } catch (e) {
+            console.log('Calendar cleanup error (non-fatal):', e.message)
+        }
+
+        // Clear the refresh token and returnTo URL
+        await doctorModel.findByIdAndUpdate(docId, { 
+            googleRefreshToken: null,
+            googleReturnTo: null
+        })
+        
+        return res.json({ 
+            success: true, 
+            message: `Google Calendar disconnected successfully. Removed ${deletedTasks} tasks and ${deletedEvents} calendar events.` 
+        })
     } catch (e) {
+        console.error('Google disconnect failed:', e)
         return res.status(500).json({ success: false, message: e.message })
     }
 }
