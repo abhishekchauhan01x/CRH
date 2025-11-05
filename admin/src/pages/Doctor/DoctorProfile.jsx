@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { DoctorContext } from '../../context/DoctorContext'
 import { AppContext } from '../../context/AppContext'
 import axios from 'axios'
@@ -7,6 +8,8 @@ const DoctorProfile = () => {
 
   const { dToken, profileData, setProfileData, getProfileData, backendUrl } = useContext(DoctorContext)
   const { currency } = useContext(AppContext)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const [isEdit, setIsEdit] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -71,9 +74,9 @@ const DoctorProfile = () => {
         return;
       }
       
-      // Redirect back to the app root to avoid static host 404s on deep links
+      // Redirect back to the doctor profile page after Google OAuth
       const appOrigin = window.location.origin
-      const returnTo = encodeURIComponent(`${appOrigin}/?google=connected`)
+      const returnTo = encodeURIComponent(`${appOrigin}/doctor-profile?google=connected`)
       const { data } = await axios.get(`${backendUrl}/api/doctor/google/auth-url?returnTo=${returnTo}`, { headers: { dToken } })
       if (data.success && data.url) {
         window.location.href = data.url
@@ -179,6 +182,27 @@ const DoctorProfile = () => {
       getProfileData()
     }
   }, [dToken])
+
+  // Handle Google Calendar connection callback
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search)
+    const googleConnected = searchParams.get('google')
+    const success = searchParams.get('success')
+    const error = searchParams.get('error')
+
+    if (googleConnected === 'connected') {
+      if (success === 'true') {
+        toast.success('Google Calendar connected successfully!')
+        // Refresh profile data to get updated Google connection status
+        getProfileData()
+      } else if (error) {
+        toast.error(`Failed to connect Google Calendar: ${error}`)
+      }
+      
+      // Clear query parameters
+      navigate('/doctor-profile', { replace: true })
+    }
+  }, [location.search, navigate, getProfileData])
 
   // Keep current time fresh so headers and calendar stay real-time
   useEffect(() => {
