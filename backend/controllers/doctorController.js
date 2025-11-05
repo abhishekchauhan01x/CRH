@@ -1034,27 +1034,63 @@ const googleDisconnect = async (req, res) => {
         // Clean up all Google Tasks created by our system
         try {
             const tasks = google.tasks({ version: 'v1', auth: oAuth2Client })
-            let pageToken
+            
+            // Get all task lists (not just default)
+            let taskLists = []
+            try {
+                const taskListsResponse = await tasks.tasklists.list()
+                taskLists = taskListsResponse.data.items || []
+            } catch (listErr) {
+                console.log('Could not fetch task lists, using @default:', listErr.message)
+                taskLists = [{ id: '@default' }]
+            }
+            
             const titleMarker = 'Appointment with '
-            do {
-                const list = await tasks.tasks.list({ tasklist: '@default', maxResults: 100, pageToken, showCompleted: true, showHidden: true })
-                const items = Array.isArray(list?.data?.items) ? list.data.items : []
-                for (const t of items) {
-                    if (!t?.id) continue
-                    const titleMatch = typeof t.title === 'string' && t.title.includes(titleMarker)
-                    const notes = String(t.notes || '')
-                    const notesMatch = notes.includes(`Doctor: ${doctor.name}`) || notes.includes('Doctor: ')
-                    if (titleMatch && notesMatch) {
-                        try { 
-                            await tasks.tasks.delete({ tasklist: '@default', task: t.id })
-                            deletedTasks++ 
-                        } catch (e) {
-                            console.log('Failed to delete task:', e.message)
+            
+            // Check each task list
+            for (const taskList of taskLists) {
+                try {
+                    let pageToken
+                    do {
+                        const list = await tasks.tasks.list({ 
+                            tasklist: taskList.id, 
+                            maxResults: 100, 
+                            pageToken, 
+                            showCompleted: true, 
+                            showHidden: true 
+                        })
+                        const items = Array.isArray(list?.data?.items) ? list.data.items : []
+                        
+                        for (const t of items) {
+                            if (!t?.id) continue
+                            
+                            const title = String(t.title || '')
+                            const notes = String(t.notes || '')
+                            
+                            // Match tasks by: 
+                            // 1. Title contains "Appointment with" OR
+                            // 2. Notes contain "APT_ID:" (our system marker) OR
+                            // 3. Notes contain "Doctor:" (indicates it's from our system)
+                            const titleMatch = title.includes(titleMarker)
+                            const hasAptId = notes.includes('APT_ID:')
+                            const hasDoctorMarker = notes.includes('Doctor:')
+                            
+                            if (titleMatch || hasAptId || hasDoctorMarker) {
+                                try { 
+                                    await tasks.tasks.delete({ tasklist: taskList.id, task: t.id })
+                                    deletedTasks++
+                                    console.log(`Deleted task: ${title} from list ${taskList.id}`)
+                                } catch (e) {
+                                    console.log(`Failed to delete task ${t.id}:`, e.message)
+                                }
+                            }
                         }
-                    }
+                        pageToken = list?.data?.nextPageToken
+                    } while (pageToken)
+                } catch (taskListErr) {
+                    console.log(`Error processing task list ${taskList.id}:`, taskListErr.message)
                 }
-                pageToken = list?.data?.nextPageToken
-            } while (pageToken)
+            }
         } catch (e) {
             console.log('Tasks cleanup error (non-fatal):', e.message)
         }
@@ -1062,28 +1098,89 @@ const googleDisconnect = async (req, res) => {
         // Clean up all Calendar events created by our system
         try {
             const calendar = google.calendar({ version: 'v3', auth: oAuth2Client })
-            const q = 'Appointment with '
-            const now = new Date()
-            const timeMin = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate()).toISOString()
-            const timeMax = new Date(now.getFullYear() + 5, now.getMonth(), now.getDate()).toISOString()
-            let pageToken
-            do {
-                const list = await calendar.events.list({ calendarId: 'primary', q, timeMin, timeMax, maxResults: 2500, singleEvents: true, pageToken })
-                const items = Array.isArray(list?.data?.items) ? list.data.items : []
-                for (const e of items) {
-                    if (!e?.id) continue
-                    const title = String(e.summary || '')
-                    if (title.includes(q)) {
-                        try { 
-                            await calendar.events.delete({ calendarId: 'primary', eventId: e.id })
-                            deletedEvents++ 
-                        } catch (e) {
-                            console.log('Failed to delete event:', e.message)
+            
+            // Get all calendars the user has access to
+            let userCalendars = []
+            try {
+                const calendarList = await calendar.calendarList.list()
+                userCalendars = calendarList.data.items || []
+            } catch (listErr) {
+                console.log('Could not fetch calendar list, using primary:', listErr.message)
+                userCalendars = [{ id: 'primary' }]
+            }
+            
+            const titleMarker = 'Appointment with '
+            
+            // Check each calendar
+            for (const cal of userCalendars) {
+                try {
+                    // Search without time filter to get all events (past and future)
+                    // Use a broader time range to catch all events
+                    const now = new Date()
+                    const timeMin = new Date(now.getFullYear() - 10, 0, 1).toISOString() // 10 years ago
+                    const timeMax = new Date(now.getFullYear() + 10, 11, 31).toISOString() // 10 years ahead
+                    
+                    let pageToken
+                    do {
+                        // First try with query parameter
+                        let list
+                        try {
+                            list = await calendar.events.list({ 
+                                calendarId: cal.id, 
+                                q: titleMarker, 
+                                timeMin, 
+                                timeMax, 
+                                maxResults: 2500, 
+                                singleEvents: true, 
+                                pageToken 
+                            })
+                        } catch (queryErr) {
+                            // If query fails, try without query to get all events
+                            list = await calendar.events.list({ 
+                                calendarId: cal.id, 
+                                timeMin, 
+                                timeMax, 
+                                maxResults: 2500, 
+                                singleEvents: true, 
+                                pageToken 
+                            })
                         }
-                    }
+                        
+                        const items = Array.isArray(list?.data?.items) ? list.data.items : []
+                        
+                        for (const e of items) {
+                            if (!e?.id) continue
+                            
+                            const title = String(e.summary || '')
+                            const description = String(e.description || '')
+                            
+                            // Match events by:
+                            // 1. Title contains "Appointment with" OR
+                            // 2. Description contains "APT_ID:" (our system marker) OR
+                            // 3. Description contains "Doctor:" (indicates it's from our system)
+                            const titleMatch = title.includes(titleMarker)
+                            const hasAptId = description.includes('APT_ID:')
+                            const hasDoctorMarker = description.includes('Doctor:')
+                            
+                            if (titleMatch || hasAptId || hasDoctorMarker) {
+                                try { 
+                                    await calendar.events.delete({ 
+                                        calendarId: cal.id, 
+                                        eventId: e.id 
+                                    })
+                                    deletedEvents++
+                                    console.log(`Deleted event: ${title} from calendar ${cal.id}`)
+                                } catch (deleteErr) {
+                                    console.log(`Failed to delete event ${e.id}:`, deleteErr.message)
+                                }
+                            }
+                        }
+                        pageToken = list?.data?.nextPageToken
+                    } while (pageToken)
+                } catch (calErr) {
+                    console.log(`Error processing calendar ${cal.id}:`, calErr.message)
                 }
-                pageToken = list?.data?.nextPageToken
-            } while (pageToken)
+            }
         } catch (e) {
             console.log('Calendar cleanup error (non-fatal):', e.message)
         }
