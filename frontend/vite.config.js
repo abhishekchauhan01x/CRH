@@ -26,12 +26,14 @@ export default defineConfig({
         drop_debugger: true
       }
     },
-    // Optimize asset handling
+    // Optimize asset handling - don't inline large assets, but allow small images
     assetsInlineLimit: 4096,
     // Enable source maps for debugging (disable in production)
     sourcemap: false,
     // Target modern browsers for better optimization
-    target: 'es2015'
+    target: 'es2015',
+    // Ensure proper chunking
+    chunkSizeWarningLimit: 1000
   },
   // Optimize dependencies
   optimizeDeps: {
