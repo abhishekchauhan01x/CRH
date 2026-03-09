@@ -7,51 +7,64 @@ const TopDoctors = () => {
     const { doctors } = useContext(AppContext);
 
     return (
-        <div className="flex flex-col items-center gap-3 sm:gap-4 my-10 sm:my-14 md:my-16 text-gray-900 px-3 sm:px-4 md:mx-10">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-center">Top Doctors to Book</h1>
-            <p className="w-full sm:w-2/3 md:w-1/2 text-center text-xs sm:text-sm text-gray-600">
-                Simply browse through our extensive list of trusted doctors.
-            </p>
-            <div className="w-full flex justify-center">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5 min-w-0 w-full max-w-[1200px] px-1 sm:px-0">
-                {doctors.slice(0, 10).map((item, index) => (
-                    <div
-                        onClick={() => {
-                            navigate(`/appointments/${item._id}`);
-                            scrollTo(0, 0);
-                        }}
-                        className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:shadow-md sm:hover:shadow-lg transition-all duration-300 bg-white max-w-xs sm:max-w-sm w-full mx-auto"
-                        key={index}>
-                        <div className="relative w-full h-60 sm:h-60 md:h-64 lg:h-72 bg-blue-50 overflow-hidden">
-                            <img 
-                                className="w-full h-full object-cover object-top sm:object-center transform translate-y-[6px] sm:translate-y-0 md:hover:scale-105 transition-transform duration-300"  
-                                src={item.image} 
-                                alt={`${item.name} profile`}
-                                loading="lazy"
-                                decoding="async"
-                                onError={(e) => {
-                                    e.target.src = 'https://via.placeholder.com/256x288?text=Doctor'
-                                }}
-                            />
-                        </div>
-                        <div className="p-3 sm:p-4">
-                            <div className={`flex items-center gap-2 text-[11px] sm:text-xs md:text-sm ${item.available ? 'text-green-600' : 'text-gray-500'} mb-1.5 sm:mb-2 md:mb-3`}>
-                                <p className={`w-2 h-2 ${item.available ? 'bg-green-500' : 'bg-gray-400'} rounded-full`}></p>
-                                <p className="whitespace-nowrap">{item.available ? 'Available' : 'Not Available'}</p>
+        <section className="py-14 sm:py-18 md:py-20 px-3 sm:px-4">
+            {/* Section Header */}
+            <div className="text-center mb-10 sm:mb-12">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                    Top Doctors to Book
+                </h2>
+                <div className="w-16 h-1 bg-gradient-to-r from-sky-500 to-cyan-400 rounded-full mx-auto mt-3 mb-4" />
+                <p className="text-gray-500 text-sm sm:text-base max-w-md mx-auto">
+                    Simply browse through our extensive list of trusted doctors.
+                </p>
+            </div>
+
+            {/* Doctor Grid */}
+            <div className="max-w-[1200px] mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
+                    {doctors.slice(0, 10).map((item, index) => (
+                        <div
+                            onClick={() => {
+                                navigate(`/appointments/${item._id}`);
+                                scrollTo(0, 0);
+                            }}
+                            className="group bg-white rounded-2xl overflow-hidden cursor-pointer card-hover border border-gray-100 shadow-sm"
+                            key={index}
+                        >
+                            {/* Image */}
+                            <div className="relative bg-blue-50 overflow-hidden">
+                                <img
+                                    className="w-full transition-transform duration-[500ms] group-hover:scale-105"
+                                    src={item.image}
+                                    alt={`${item.name} profile`}
+                                    loading="lazy"
+                                    decoding="async"
+                                    onError={(e) => {
+                                        e.target.src = 'https://via.placeholder.com/256x288?text=Doctor'
+                                    }}
+                                />
+                                {/* Availability badge */}
+                                <div className={`absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${item.available
+                                    ? 'bg-emerald-500/90 text-white'
+                                    : 'bg-gray-800/70 text-gray-200'
+                                    }`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${item.available ? 'bg-white animate-pulse' : 'bg-gray-400'}`} />
+                                    {item.available ? 'Available' : 'Unavailable'}
+                                </div>
                             </div>
-                            <p className="text-gray-900 text-sm sm:text-base md:text-lg font-semibold mb-0.5 line-clamp-2">{item.name}</p>
-                            <p className="text-gray-600 text-[11px] sm:text-xs md:text-sm">{item.speciality}</p>
+
+                            {/* Info */}
+                            <div className="p-4 sm:p-5">
+                                <h3 className="text-gray-900 text-base sm:text-lg font-semibold mb-1 line-clamp-1 group-hover:text-sky-600 transition-colors duration-200">
+                                    {item.name}
+                                </h3>
+                                <p className="text-gray-500 text-xs sm:text-sm">{item.speciality}</p>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
                 </div>
             </div>
-            {/* <button
-                onClick={() => { navigate('/doctors'); scrollTo(0, 0); }}
-                className="bg-blue-50 text-gray-600 px-12 py-3 rounded-full mt-10 text-sm sm:text-base font-medium hover:bg-blue-100 transition-colors">
-                More
-            </button> */}
-        </div>
+        </section>
     );
 };
 

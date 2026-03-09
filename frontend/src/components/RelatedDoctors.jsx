@@ -14,41 +14,69 @@ const RelatedDoctors = ({ speciality, docId }) => {
         }
     }, [doctors, speciality, docId]);
 
+    if (relDoc.length === 0) return null;
+
     return (
-        <div className="flex flex-col items-center gap-4 my-16 text-gray-900 md:mx-10">
-            <h1 className="text-3xl font-medium">Top Doctors to Book</h1>
-            <p className="sm:w-1/3 text-center text-sm">
-                Simply browse through our extensive list of trusted doctors.
-            </p>
-            <div className="w-full grid grid-cols-auto gap-4 pt-5 gap-y-6 px-3 sm:px-0">
+        <section className="py-14 sm:py-16">
+            {/* Section Header */}
+            <div className="text-center mb-8 sm:mb-10">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
+                    Related Doctors
+                </h2>
+                <div className="w-14 h-1 bg-gradient-to-r from-sky-500 to-cyan-400 rounded-full mx-auto mt-3 mb-3" />
+                <p className="text-gray-500 text-sm max-w-sm mx-auto">
+                    Browse other specialists in {speciality}
+                </p>
+            </div>
+
+            {/* Doctor Grid */}
+            <div className="grid grid-cols-auto gap-5 px-3 sm:px-0">
                 {relDoc.slice(0, 5).map((item, index) => (
                     <div
                         onClick={() => {
                             navigate(`/appointments/${item._id}`);
                             scrollTo(0, 0);
                         }}
-                        className="border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:-translate-y-[10px] transition-all duration-500 flex flex-col"
-                        key={index}>
-                        <div className="w-full  bg-blue-50 overflow-hidden">
-                            <img className="w-full h-full object-cover object-center" src={item.image} alt={`${item.name} profile`} />
-                        </div>
-                        <div className="p-4 flex flex-col gap-1 flex-1">
-                            <div className={`flex items-center gap-2 text-sm text-center ${item.available ? 'text-green-500' : 'text-gray-500'} `}>
-                                <p className={`w-2 h-2 ${item.available ? 'bg-green-500' : 'bg-gray-500'} rounded-full`}></p>
-                                <p>{item.available ? 'Available' : 'Not Available'}</p>
+                        className="group bg-white rounded-2xl overflow-hidden cursor-pointer card-hover border border-gray-100 shadow-sm"
+                        key={index}
+                    >
+                        <div className="relative bg-blue-50 overflow-hidden">
+                            <img
+                                className="w-full transition-transform duration-[500ms] group-hover:scale-105"
+                                src={item.image}
+                                alt={`${item.name} profile`}
+                            />
+                            <div className={`absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${item.available
+                                ? 'bg-emerald-500/90 text-white'
+                                : 'bg-gray-800/70 text-gray-200'
+                                }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${item.available ? 'bg-white animate-pulse' : 'bg-gray-400'}`} />
+                                {item.available ? 'Available' : 'Unavailable'}
                             </div>
-                            <p className="text-gray-900 text-lg font-medium">{item.name}</p>
-                            <p className="text-gray-600 text-sm">{item.speciality}</p>
+                        </div>
+                        <div className="p-4">
+                            <h3 className="text-gray-900 text-base font-semibold mb-1 group-hover:text-sky-600 transition-colors duration-200">
+                                {item.name}
+                            </h3>
+                            <p className="text-gray-500 text-sm">{item.speciality}</p>
                         </div>
                     </div>
                 ))}
             </div>
-            <button
-                onClick={() => { navigate('/doctors'); scrollTo(0, 0); }}
-                className="bg-blue-50 text-gray-600 px-12 py-3 rounded-full mt-10 text-sm sm:text-base font-medium hover:bg-blue-100 transition-colors">
-                More
-            </button>
-        </div>
+
+            {/* More Button */}
+            <div className="text-center mt-10">
+                <button
+                    onClick={() => { navigate('/doctors'); scrollTo(0, 0); }}
+                    className="group inline-flex items-center gap-2 px-8 py-3 rounded-full border-2 border-gray-200 text-gray-600 text-sm font-semibold hover:border-sky-400 hover:text-sky-600 hover:bg-sky-50/50 transition-all duration-300 cursor-pointer"
+                >
+                    View All Doctors
+                    <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                    </svg>
+                </button>
+            </div>
+        </section>
     );
 };
 

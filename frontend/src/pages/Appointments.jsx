@@ -10,11 +10,6 @@ const Appointments = () => {
     const { docId } = useParams();
     const { doctors, currenySymbol, backendUrl, token, getDoctorsData } = useContext(AppContext);
     const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
-    
-    // Time slot configuration:
-    // Monday to Saturday: 9 AM - 1 PM, then 5 PM - 7 PM (10-minute intervals)
-    // Sunday: 9 AM - 2 PM (10-minute intervals)
-    // Past time slots are automatically hidden (not visible)
 
     const navigate = useNavigate()
     const location = useLocation()
@@ -28,25 +23,21 @@ const Appointments = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [userAppointments, setUserAppointments] = useState([]);
 
-    // Open WhatsApp chat with a predefined message to this doctor's number
     const openWhatsApp = () => {
         try {
-            const phone = String(docInfo?.whatsapp || '919555664040') // E.164 without +
-            // const msg = `Hello  ${docInfo?.name || ''}, I would like to inquire about an appointment.`
+            const phone = String(docInfo?.whatsapp || '919555664040')
             const url = `https://wa.me/${phone}`
             window.open(url, '_blank')
-        } catch (_) {}
+        } catch (_) { }
     }
 
     const fetchDocInfo = async () => {
         const docInfo = doctors.find((doc) => doc._id === docId);
         setDocInfo(docInfo);
-        console.log(docInfo);
     };
 
     const fetchUserAppointments = async () => {
         if (!token) return;
-        
         try {
             const { data } = await axios.get(backendUrl + '/api/user/appointments', { headers: { token } });
             if (data.success) {
@@ -57,7 +48,6 @@ const Appointments = () => {
         }
     };
 
-    // Normalize a time string to comparable key: HH:MM in 24h
     const normalizeTimeKey = (timeStr) => {
         try {
             if (!timeStr || typeof timeStr !== 'string') return ''
@@ -74,7 +64,6 @@ const Appointments = () => {
         } catch { return String(timeStr || '').trim().toLowerCase() }
     }
 
-    // Helper function to check if a time slot is already booked by the user
     const isTimeSlotBooked = (dateTime, time) => {
         if (!dateTime || !time) return false;
         const day = dateTime.getDate();
@@ -91,12 +80,9 @@ const Appointments = () => {
 
     const getAvailableSlots = async () => {
         setDocSlots([])
-
-        // getting current date and time
         let today = new Date()
         const now = new Date()
 
-        // Get doctor's schedule (supports two sessions per day)
         const doctorSchedule = docInfo?.schedule || {
             monday: { available: true, startTime: "09:00", endTime: "13:00", hasSecondSession: true, secondStartTime: "17:00", secondEndTime: "19:00" },
             tuesday: { available: true, startTime: "09:00", endTime: "13:00", hasSecondSession: true, secondStartTime: "17:00", secondEndTime: "19:00" },
@@ -110,27 +96,18 @@ const Appointments = () => {
         const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
         for (let i = 0; i < 7; i++) {
-            // getting date with index
             let currentDate = new Date(today)
             currentDate.setDate(today.getDate() + i)
-
-            // getting day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
             const dayOfWeek = currentDate.getDay()
             const dayName = dayNames[dayOfWeek]
             const daySchedule = doctorSchedule[dayName]
-
             let timeSlots = []
 
-            // Check if doctor is available on this day
             if (daySchedule && daySchedule.available) {
                 const sessions = []
-                const morningStart = String(daySchedule.startTime || '09:00')
-                const morningEnd = String(daySchedule.endTime || '13:00')
-                sessions.push({ start: morningStart, end: morningEnd })
+                sessions.push({ start: String(daySchedule.startTime || '09:00'), end: String(daySchedule.endTime || '13:00') })
                 if (daySchedule.hasSecondSession) {
-                    const eveningStart = String(daySchedule.secondStartTime || '17:00')
-                    const eveningEnd = String(daySchedule.secondEndTime || '19:00')
-                    sessions.push({ start: eveningStart, end: eveningEnd })
+                    sessions.push({ start: String(daySchedule.secondStartTime || '17:00'), end: String(daySchedule.secondEndTime || '19:00') })
                 }
 
                 const generateSessionSlots = (sessionStartStr, sessionEndStr) => {
@@ -153,14 +130,11 @@ const Appointments = () => {
                     let currentSlot = new Date(sessionStart)
                     while (currentSlot < sessionEnd) {
                         let formattedTime = currentSlot.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-
                         let day = currentSlot.getDate()
                         let month = currentSlot.getMonth() + 1
                         let year = currentSlot.getFullYear()
-
                         const slotDate = day + "_" + month + "_" + year
                         const slotTime = formattedTime
-
                         const bookedTimes = docInfo?.slots_booked?.[slotDate] || []
                         const isSlotBookedByOthers = bookedTimes.some(t => normalizeTimeKey(t) === normalizeTimeKey(slotTime))
 
@@ -169,40 +143,30 @@ const Appointments = () => {
                             time: formattedTime,
                             isBookedByOthers: isSlotBookedByOthers
                         })
-
                         currentSlot.setMinutes(currentSlot.getMinutes() + 10)
                     }
                 }
-
                 sessions.forEach(s => generateSessionSlots(s.start, s.end))
             }
-
             setDocSlots((prev) => [...prev, timeSlots])
         }
     };
-
 
     const bookAppointment = async () => {
         if (!token) {
             toast.warn('Login to book appointment')
             return navigate('/login')
         }
-
         if (!slotTime) {
             return toast.error('Please select a time slot')
         }
-
         try {
             const date = docSlots[slotIndex][0].datetime
-
             let day = date.getDate()
             let month = date.getMonth() + 1
             let year = date.getFullYear()
-
             const slotDate = day + "_" + month + "_" + year
-            console.log(slotDate);
 
-            // Re-fetch latest user appointments to avoid stale state before validating
             let latestUserAppointments = userAppointments
             try {
                 const latest = await axios.get(backendUrl + '/api/user/appointments', { headers: { token } })
@@ -210,24 +174,22 @@ const Appointments = () => {
                     latestUserAppointments = latest.data.appointments
                     setUserAppointments(latest.data.appointments)
                 }
-            } catch (_) {}
+            } catch (_) { }
 
-            // Frontend validation (format-insensitive). Show toast only for active (not cancelled, not completed) conflicts
             const targetKey = normalizeTimeKey(slotTime)
-            const existingAppointment = latestUserAppointments.find(apt => 
+            const existingAppointment = latestUserAppointments.find(apt =>
                 apt.slotDate === slotDate && !apt.cancelled && !apt.isCompleted && normalizeTimeKey(apt.slotTime) === targetKey
             );
 
             if (existingAppointment) {
-                toast.error('You already have an appointment scheduled for this date and time. Please choose a different time slot.');
+                toast.error('You already have an appointment scheduled for this date and time.');
                 return;
             }
 
-            // Frontend validation: Check if slot is already booked by other users (format-insensitive)
             const bookedTimes = docInfo?.slots_booked?.[slotDate] || []
             const isSlotBookedByOthers = bookedTimes.some(t => normalizeTimeKey(t) === normalizeTimeKey(slotTime))
             if (isSlotBookedByOthers) {
-                toast.error('This time slot is already booked by another user. Please choose a different time slot.');
+                toast.error('This time slot is already booked. Please choose a different time.');
                 return;
             }
 
@@ -242,212 +204,161 @@ const Appointments = () => {
             if (data.success) {
                 toast.success(rescheduleId ? 'Appointment rescheduled' : data.message)
                 getDoctorsData()
-                fetchUserAppointments() // Refresh user appointments
+                fetchUserAppointments()
                 navigate('/my-appointment')
             } else {
                 toast.error(data.message)
             }
         } catch (error) {
-            console.log(error)
             toast.error(error.message)
         }
     }
 
+    useEffect(() => { fetchDocInfo(); }, [doctors, docId]);
     useEffect(() => {
-        fetchDocInfo();
-    }, [doctors, docId]);
-
-    // Ensure we always have the latest doctor data (including freed slots after admin deletes)
-    useEffect(() => {
-        // Refresh doctors list on mount/when doc changes
         getDoctorsData();
-        // Lightweight periodic refresh while on this page to reflect admin-side changes
-        const interval = setInterval(() => {
-            getDoctorsData();
-        }, 60000); // 1 minute
+        const interval = setInterval(() => { getDoctorsData(); }, 60000);
         return () => clearInterval(interval);
     }, [docId]);
-
+    useEffect(() => { fetchUserAppointments(); }, [token]);
+    useEffect(() => { getAvailableSlots(); }, [docInfo, currentTime]);
     useEffect(() => {
-        fetchUserAppointments();
-    }, [token]);
-
-    useEffect(() => {
-        getAvailableSlots();
-    }, [docInfo, currentTime]);
-
-    useEffect(() => {
-        console.log(docSlots);
-    }, [docSlots]);
-
-    // Update current time every minute for real-time slot availability
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 60000); // Update every minute
-
+        const timer = setInterval(() => { setCurrentTime(new Date()); }, 60000);
         return () => clearInterval(timer);
     }, []);
 
     return (
         docInfo && (
-            <div className="px-4 sm:px-6 md:px-10 lg:px-16">
-                {/* Doctor Details */}
-                <div className="flex flex-col sm:flex-row gap-4 items-start">
-                    <div>
-                        <img
-                            className="bg-primary w-full sm:max-w-72 rounded-lg object-cover" src={docInfo.image}
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+                {/* Doctor Details Card */}
+                <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 overflow-hidden mb-8">
+                    <div className="flex flex-col sm:flex-row">
+                        {/* Doctor Image */}
+                        <div className="sm:w-72 flex-shrink-0">
+                            <img
+                                className="w-full h-64 sm:h-full object-cover bg-gradient-to-b from-sky-50 to-blue-100"
+                                src={docInfo.image}
+                                alt={`${docInfo.name} profile`}
+                            />
+                        </div>
 
-                            alt={`${docInfo.name} profile`}
-                        />
-                    </div>
-
-                    <div className="flex-1 min-w-0 border border-gray-400 rounded-lg p-5 sm:p-6 md:p-8 bg-white mx-2 sm:mx-0 mt-[-80px] sm:mt-0">
-                        <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4 flex-wrap">
-                            <div className="min-w-0">
-                                <div className="relative">
-                                    <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 whitespace-normal break-words max-w-full pr-6 sm:pr-7 md:pr-8">
-                                        {docInfo.name}
-                                    </h1>
-                                    <img className="w-4 sm:w-5 absolute right-0 top-0" src={assets.verified_icon} alt="Verified" />
+                        {/* Doctor Info */}
+                        <div className="flex-1 p-5 sm:p-7">
+                            <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{docInfo.name}</h1>
+                                        <img className="w-5" src={assets.verified_icon} alt="Verified" />
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
+                                        <span>{docInfo.degree} — {docInfo.speciality}</span>
+                                        <span className="px-2.5 py-0.5 text-xs font-medium bg-sky-50 text-sky-600 rounded-full border border-sky-100">
+                                            {docInfo.experience}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2 text-xs sm:text-sm mt-1 text-gray-600 flex-wrap">
-                                    <p>
-                                        {docInfo.degree} - {docInfo.speciality}
-                                    </p>
-                                    <button className="py-0.5 px-2 border text-[10px] sm:text-xs rounded-full whitespace-nowrap">
-                                        {docInfo.experience}
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
                                 <button
                                     onClick={openWhatsApp}
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded border border-emerald-500 text-emerald-600 hover:bg-emerald-50 text-xs sm:text-sm whitespace-nowrap w-full sm:w-auto justify-center"
-                                    title="Chat on WhatsApp"
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium hover:bg-emerald-100 transition-colors cursor-pointer"
                                 >
-                                    Chat on WhatsApp
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /></svg>
+                                    WhatsApp
                                 </button>
                             </div>
+
+                            <div className="mb-4">
+                                <h3 className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1">
+                                    About <img className="w-4" src={assets.info_icon} alt="Info" />
+                                </h3>
+                                <p className="text-sm text-gray-500 leading-relaxed">{docInfo.about}</p>
+                            </div>
+
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl text-sm">
+                                <span className="text-gray-500">Appointment fee:</span>
+                                <span className="font-bold text-gray-900">{currenySymbol}{docInfo.fees}</span>
+                            </div>
                         </div>
-                        <div>
-                            <p className="flex items-center gap-1 text-sm sm:text-base font-medium text-gray-900 mt-3">
-                                About <img className="w-4 sm:w-5" src={assets.info_icon} alt="Info" />
-                            </p>
-                            <p className="text-sm sm:text-base leading-6 sm:leading-7 text-gray-600 mt-1 break-words">
-                                {docInfo.about}
-                            </p>
-                        </div>
-                        <p className="text-gray-600 font-medium mt-4">
-                            Appointment fee: <span className="text-gray-600">{currenySymbol}{docInfo.fees}</span>
-                        </p>
                     </div>
                 </div>
 
-                {/* Booking Slots */}
-                <div className="mt-4 sm:ml-72 sm:pl-4 font-medium text-gray-700">
-                    <p className="text-sm sm:text-base">Booking Slots</p>
-                    <p className="text-xs text-gray-500 mt-1 mb-2">
-                        Note: You can book multiple appointments on the same date, but not the same time slot. Time slots marked as "Booked" are already taken by other users. Time slots marked as "Your Booking" are your existing appointments.
+                {/* Booking Section */}
+                <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 p-5 sm:p-7 mb-8">
+                    <h2 className="text-lg font-bold text-gray-900 mb-1">Select Appointment Slot</h2>
+                    <p className="text-xs text-gray-400 mb-5">
+                        Choose a date and time. Slots marked "Booked" or "Your Booking" are unavailable.
                     </p>
-                    <div className="flex gap-4 items-center w-full overflow-x-auto mt-4">
+
+                    {/* Date Selector */}
+                    <div className="flex gap-3 overflow-x-auto pb-2 mb-5 scrollbar-hide">
                         {docSlots.length > 0 && docSlots.map((item, index) => {
                             const slotDate = new Date();
                             slotDate.setDate(slotDate.getDate() + index);
-                            const isToday = index === 0;
-                            
-                            // Get doctor's schedule for this day
                             const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
                             const dayName = dayNames[slotDate.getDay()]
                             const doctorSchedule = docInfo?.schedule || {}
                             const daySchedule = doctorSchedule[dayName]
                             const isDoctorAvailable = daySchedule?.available
-                            
+
                             if (item.length > 0) {
                                 return (
-                                    <div
+                                    <button
                                         onClick={() => setSlotIndex(index)}
-                                        className={`text-center py-3 sm:py-4 md:py-6 min-w-12 sm:min-w-14 md:min-w-16 rounded-full cursor-pointer text-xs sm:text-sm ${
-                                            slotIndex === index ? 'bg-primary text-white' : 'border border-gray-200'
-                                        }`}
+                                        className={`flex flex-col items-center min-w-[56px] sm:min-w-[64px] py-3 sm:py-4 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer flex-shrink-0 ${slotIndex === index
+                                                ? 'bg-gradient-to-b from-[#3f5261] to-[#2c3e50] text-white shadow-md'
+                                                : 'bg-gray-50 border border-gray-200 text-gray-700 hover:border-sky-300 hover:bg-sky-50'
+                                            }`}
                                         key={index}
                                     >
-                                        <p>{daysOfWeek[item[0].datetime.getDay()]}</p>
-                                        <p>{item[0].datetime.getDate()}</p>
-                                    </div>
+                                        <span className="text-[10px] sm:text-xs opacity-70">{daysOfWeek[item[0].datetime.getDay()]}</span>
+                                        <span className="text-base sm:text-lg font-bold mt-0.5">{item[0].datetime.getDate()}</span>
+                                    </button>
                                 );
-                            } else if (isToday) {
+                            } else if (index === 0 || !isDoctorAvailable) {
                                 return (
                                     <div
-                                        onClick={() => setSlotIndex(index)}
-                                        className={`text-center py-3 sm:py-4 md:py-6 min-w-12 sm:min-w-14 md:min-w-16 rounded-full cursor-pointer text-xs sm:text-sm ${
-                                            slotIndex === index ? 'bg-primary text-white' : 'border border-gray-200'
-                                        }`}
+                                        className="flex flex-col items-center min-w-[56px] sm:min-w-[64px] py-3 sm:py-4 rounded-xl text-xs sm:text-sm bg-gray-50 border border-gray-200 text-gray-400 cursor-not-allowed flex-shrink-0"
                                         key={index}
+                                        onClick={() => item.length === 0 && index === 0 && setSlotIndex(index)}
                                     >
-                                        <p>{daysOfWeek[slotDate.getDay()]}</p>
-                                        <p>{slotDate.getDate()}</p>
+                                        <span className="text-[10px] sm:text-xs">{daysOfWeek[slotDate.getDay()]}</span>
+                                        <span className="text-base sm:text-lg font-bold mt-0.5">{slotDate.getDate()}</span>
+                                        {!isDoctorAvailable && <span className="text-[9px] text-red-400 mt-0.5">Off</span>}
                                     </div>
                                 );
-                            } else if (!isDoctorAvailable) {
-                                // Show "Not Available" for days when doctor is not available
-                                return (
-                                    <div
-                                        className="text-center py-3 sm:py-4 md:py-6 min-w-12 sm:min-w-14 md:min-w-16 rounded-full border border-gray-200 bg-gray-100 cursor-not-allowed text-xs sm:text-sm"
-                                        key={index}
-                                    >
-                                        <p className="text-gray-500">{daysOfWeek[slotDate.getDay()]}</p>
-                                        <p className="text-gray-500">{slotDate.getDate()}</p>
-                                        <p className="text-[10px] sm:text-xs text-red-500 mt-1">Not Available</p>
-                                    </div>
-                                );
-                            } else {
-                                return null;
                             }
+                            return null;
                         })}
                     </div>
 
-                    <div className="flex items-center gap-4 w-full overflow-x-auto mt-4">
+                    {/* Time Slots */}
+                    <div className="flex flex-wrap gap-2 sm:gap-2.5 mb-6">
                         {docSlots.length && docSlots[slotIndex] && docSlots[slotIndex].length > 0 ?
                             docSlots[slotIndex].map((item, index) => {
                                 const isPastSlot = new Date(item.datetime) < currentTime;
-                                // Don't render past slots
                                 if (isPastSlot) return null;
-                                
-                                // Check if user already has an appointment for this specific time slot
                                 const isSlotBookedByUser = isTimeSlotBooked(item.datetime, item.time);
-                                // Check if slot is booked by other users
                                 const isSlotBookedByOthers = item.isBookedByOthers;
-                                
-                                // Slot is unavailable if booked by user or others
                                 const isSlotUnavailable = isSlotBookedByUser || isSlotBookedByOthers;
-                                
+
                                 return (
-                                    <p
+                                    <button
                                         onClick={() => !isSlotUnavailable && setSlotTime(item.time)}
-                                        className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer border transition
-                                            ${isSlotUnavailable
-                                                ? 'bg-red-100 text-red-600 border-red-300 cursor-not-allowed'
+                                        className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer border ${isSlotUnavailable
+                                                ? 'bg-red-50 text-red-400 border-red-200 cursor-not-allowed line-through'
                                                 : item.time === slotTime
-                                                    ? 'bg-primary text-white border-primary'
-                                                    : 'text-gray-600 border-gray-300 hover:bg-blue-50'
+                                                    ? 'bg-gradient-to-r from-[#3f5261] to-[#2c3e50] text-white border-transparent shadow-md'
+                                                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700'
                                             }`}
                                         key={index}
-                                        title={isSlotBookedByUser ? 'You already have an appointment at this time' : 
-                                               isSlotBookedByOthers ? 'This time slot is already booked by another user' : ''}
+                                        title={isSlotBookedByUser ? 'Your existing booking' : isSlotBookedByOthers ? 'Booked by another user' : ''}
                                     >
                                         {item.time.toLowerCase()}
-                                        {isSlotBookedByUser && (
-                                            <span className="ml-1 text-xs">(Your Booking)</span>
-                                        )}
-                                        {isSlotBookedByOthers && !isSlotBookedByUser && (
-                                            <span className="ml-1 text-xs">(Booked)</span>
-                                        )}
-                                    </p>
+                                        {isSlotBookedByUser && <span className="ml-1 text-[10px]">(Yours)</span>}
+                                        {isSlotBookedByOthers && !isSlotBookedByUser && <span className="ml-1 text-[10px]">(Booked)</span>}
+                                    </button>
                                 );
                             })
                             : (() => {
-                                // Check if doctor is available on the selected day
                                 const selectedDate = new Date();
                                 selectedDate.setDate(selectedDate.getDate() + slotIndex);
                                 const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
@@ -456,65 +367,54 @@ const Appointments = () => {
                                 const daySchedule = doctorSchedule[dayName]
                                 const isDoctorAvailable = daySchedule?.available
 
-                                if (!isDoctorAvailable) {
-                                    return (
-                                        <p className="w-full text-start py-4 text-red-500 text-base font-semibold">
-                                            DOCTOR NOT AVAILABLE ON {dayNames[selectedDate.getDay()].toUpperCase()}
-                                        </p>
-                                    );
-                                } else {
-                                    return (
-                                        <p className="w-full text-start py-4 text-red-500 text-base font-semibold">
-                                            NO SLOTS AVAILABLE TODAY
-                                        </p>
-                                    );
-                                }
+                                return (
+                                    <div className="w-full py-6 text-center">
+                                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 text-red-500 text-sm font-medium">
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                            </svg>
+                                            {!isDoctorAvailable ? `Not available on ${dayNames[selectedDate.getDay()].charAt(0) + dayNames[selectedDate.getDay()].slice(1).toLowerCase()}` : 'No slots available'}
+                                        </div>
+                                    </div>
+                                );
                             })()
                         }
                     </div>
-                    <div className="my-6">
-                        {(() => {
-                            const isSelectedSlotBookedByUser = slotTime && docSlots[slotIndex]?.[0] ? 
-                                isTimeSlotBooked(docSlots[slotIndex][0].datetime, slotTime) : false;
-                            
-                            // Find the selected slot in the current day's slots
-                            const selectedSlot = docSlots[slotIndex]?.find(slot => slot.time === slotTime);
-                            const isSelectedSlotBookedByOthers = selectedSlot?.isBookedByOthers || false;
-                            
-                            const isSlotUnavailable = isSelectedSlotBookedByUser || isSelectedSlotBookedByOthers;
-                            
-                            return (
-                                <>
-                                    <button 
-                                        onClick={bookAppointment} 
-                                        disabled={!slotTime || isSlotUnavailable}
-                                        className={`text-sm font-light px-14 py-3 rounded-full cursor-pointer transition-all duration-300 ${
-                                            !slotTime || isSlotUnavailable
-                                                ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                                : 'bg-primary text-white hover:bg-primary/90'
+
+                    {/* Book Button */}
+                    {(() => {
+                        const isSelectedSlotBookedByUser = slotTime && docSlots[slotIndex]?.[0] ?
+                            isTimeSlotBooked(docSlots[slotIndex][0].datetime, slotTime) : false;
+                        const selectedSlot = docSlots[slotIndex]?.find(slot => slot.time === slotTime);
+                        const isSelectedSlotBookedByOthers = selectedSlot?.isBookedByOthers || false;
+                        const isSlotUnavailable = isSelectedSlotBookedByUser || isSelectedSlotBookedByOthers;
+
+                        return (
+                            <div>
+                                <button
+                                    onClick={bookAppointment}
+                                    disabled={!slotTime || isSlotUnavailable}
+                                    className={`w-full sm:w-auto px-12 py-3.5 rounded-xl text-sm font-semibold transition-all duration-300 cursor-pointer ${!slotTime || isSlotUnavailable
+                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-[#3f5261] to-[#2c3e50] text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5'
                                         }`}
-                                    >
-                                        {!slotTime ? 'Select a time slot' : 
-                                         isSelectedSlotBookedByUser ? 'You already booked this time' :
-                                         isSelectedSlotBookedByOthers ? 'Time slot already booked by another user' : 
-                                         'Book an Appointment'
-                                        }
-                                    </button>
-                                    
-                                    {slotTime && (
-                                        <p className="text-xs text-gray-500 mt-2">
-                                            Selected: {slotTime} on {docSlots[slotIndex]?.[0]?.datetime.toLocaleDateString()}
-                                            {isSelectedSlotBookedByUser ? ' (Your booking)' : 
-                                             isSelectedSlotBookedByOthers ? ' (Booked by another user)' : ''}
-                                        </p>
-                                    )}
-                                </>
-                            );
-                        })()}
-                    </div>
+                                >
+                                    {!slotTime ? 'Select a time slot' :
+                                        isSelectedSlotBookedByUser ? 'Already booked by you' :
+                                            isSelectedSlotBookedByOthers ? 'Slot already booked' :
+                                                rescheduleId ? 'Reschedule Appointment' : 'Book Appointment'}
+                                </button>
+                                {slotTime && (
+                                    <p className="text-xs text-gray-400 mt-2">
+                                        Selected: {slotTime} on {docSlots[slotIndex]?.[0]?.datetime.toLocaleDateString()}
+                                    </p>
+                                )}
+                            </div>
+                        );
+                    })()}
                 </div>
 
-                {/* Listing Related Doctors */}
+                {/* Related Doctors */}
                 <RelatedDoctors docId={docId} speciality={docInfo.speciality} />
             </div>
         )

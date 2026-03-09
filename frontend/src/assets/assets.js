@@ -2,6 +2,7 @@ import appointment_img from './appointment_img.png'
 import group_profiles from './group_profiles.png'
 import profile_pic from './profile_pic.png'
 import logo from './logo.svg'
+import logo1 from './logo1.png'
 import dropdown_icon from './dropdown_icon.svg'
 import menu_icon from './menu_icon.svg'
 import cross_icon from './cross_icon.png'
@@ -44,7 +45,7 @@ export const assets = {
     cross_icon,
     dropdown_icon,
     upload_icon,
-
+    logo1,
     crhlogo,
     drharpreet,
     eye,

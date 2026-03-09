@@ -29,7 +29,7 @@ const App = () => {
 
   return (
     <>
-      <div className='mx-4 sm:mx-[10%] scroll-smooth'>
+      <div className='mx-4 sm:mx-[10%] scroll-smooth pt-16 sm:pt-18 md:pt-20'>
         <ToastContainer />
         <Navbar />
 

@@ -1,9 +1,10 @@
-@theme{
+@theme {
     --color-primary: #3f5261;
-    --color-secondary:#5F6FFF;
+    --color-secondary: #5F6FFF;
     --grid-template-columns-auto: repeat(auto-fill, minmax(250px, 1fr));
 
 }
+
 @import "tailwindcss";
 
 * {
@@ -25,29 +26,73 @@ body {
 }
 
 
-@layer utilities{
-    .primary{
-        background-color:#3f5261;
+@layer utilities {
+    .primary {
+        background-color: #3f5261;
     }
-    
+
     /* Hide scrollbars */
     .scrollbar-hide {
-        -ms-overflow-style: none;  /* Internet Explorer 10+ */
-        scrollbar-width: none;  /* Firefox */
+        -ms-overflow-style: none;
+        /* Internet Explorer 10+ */
+        scrollbar-width: none;
+        /* Firefox */
     }
-    
+
     .scrollbar-hide::-webkit-scrollbar {
-        display: none;  /* Safari and Chrome */
+        display: none;
+        /* Safari and Chrome */
     }
 }
 
-.active hr {
-    @apply block
+/* Navbar glassmorphism on scroll */
+.navbar-scrolled {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-@media (max-width:740px) {
-    .active p {
-        @apply text-white bg-primary
+/* Mobile nav item entrance animation */
+.mobile-nav-item {
+    animation: fadeInUp 0.4s ease-out both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
+/* Shimmer skeleton for loading states */
+.shimmer-skeleton {
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.04) 40%, rgba(0, 0, 0, 0.04) 60%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Shared card hover utility */
+.card-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
+}

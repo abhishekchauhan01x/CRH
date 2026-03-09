@@ -61,7 +61,6 @@ const Login = () => {
     }
   }
 
-  // Function to fetch profiles for password reset
   const handleResetPassword = async () => {
     if (!phone || phone.length !== 10) {
       toast.error('Please enter a valid 10-digit mobile number')
@@ -70,9 +69,8 @@ const Login = () => {
 
     try {
       setIsResetting(true)
-      // First, try to get profiles by phone number
       const { data } = await axios.post(backendUrl + '/api/user/get-profiles-by-phone', { phone })
-      
+
       if (data.success && Array.isArray(data.profiles)) {
         setResetProfiles(data.profiles)
         setShowResetPassword(true)
@@ -86,7 +84,6 @@ const Login = () => {
     }
   }
 
-  // Function to reset password for selected profile
   const handlePasswordReset = async () => {
     if (!selectedResetProfile) {
       toast.error('Please select a profile')
@@ -134,249 +131,267 @@ const Login = () => {
       navigate('/')
     }
   }, [token])
-  
+
 
   return (
-    <form onSubmit={onSubmitHandler} className="min-h-[80vh] flex items-center justify-center bg-gradient-to-b from-white to-zinc-50">
-      <div className="flex flex-col gap-4 m-auto items-stretch p-8 min-w-[340px] sm:min-w-96 max-w-md w-full bg-white/90 backdrop-blur border border-zinc-200 rounded-2xl text-zinc-700 text-sm shadow-xl">
-        {/* Toggle */}
-        <div className="grid grid-cols-2 p-1 rounded-full bg-zinc-100 text-zinc-600">
-          <button
-            type="button"
-            onClick={() => setState('Sign Up')}
-            className={`${state === 'Sign Up' ? 'bg-white text-zinc-900 shadow-sm' : ''} rounded-full py-2 text-sm font-medium transition-colors`}
-          >
-            Sign Up
-          </button>
-          <button
-            type="button"
-            onClick={() => setState('Login')}
-            className={`${state === 'Login' ? 'bg-white text-zinc-900 shadow-sm' : ''} rounded-full py-2 text-sm font-medium transition-colors`}
-          >
-            Login
-          </button>
-        </div>
+    <div className="min-h-[80vh] flex items-center justify-center py-10 px-4">
+      <form onSubmit={onSubmitHandler} className="w-full max-w-md">
+        <div className="relative bg-white rounded-2xl shadow-xl shadow-gray-200/60 border border-gray-100 overflow-hidden">
+          {/* Left gradient accent */}
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-sky-400 via-cyan-400 to-sky-500" />
 
-        <p className="text-2xl font-semibold text-zinc-900">
-          {state === 'Sign Up' ? 'Create Account' : 'Welcome Back'}
-        </p>
-        <p className="text-sm sm:text-base text-zinc-500">Please {state === 'Sign Up' ? 'sign up' : 'log in'} to book appointment</p>
-        {state === 'Sign Up' && (
-          <div className="w-full">
-            <p className="text-sm sm:text-base font-medium">Full Name</p>
-            <input
-              className="border border-zinc-300 rounded-lg w-full px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/60 transition-shadow"
-              type="text"
-              placeholder="Enter your name"
-              onChange={(e) => setName(e.target.value)}
-              value={name}
-              required
-            />
-          </div>
-        )}
-        <div className="w-full">
-          <p className="text-sm sm:text-base font-medium">{state === 'Sign Up' ? 'Mobile Number' : 'Mobile Number'}</p>
-          <input
-            className="border border-zinc-300 rounded-lg w-full px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/60 transition-shadow"
-            type="tel"
-            placeholder={state === 'Sign Up' ? 'Enter your mobile number' : 'Enter your mobile number'}
-            onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0, 10))}
-            value={phone}
-            pattern="^[0-9]{10}$"
-            maxLength="10"
-            required
-          />
-          <p className="text-xs text-zinc-500 mt-1">Enter 10-digit mobile number</p>
-        </div>
-        
-        <div className="w-full">
-          <p className="text-sm sm:text-base font-medium">Password</p>
-          <div className="relative">
-            <input
-              className="border border-zinc-300 rounded-lg w-full px-3 py-2 mt-1 pr-10 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/60 transition-shadow"
-              type={showPass ? 'text' : 'password'}
-              placeholder="Enter your password"
-              onChange={(e) => setPassword(e.target.value)}
-              value={password}
-              required
-            />
-            <button type="button" onClick={()=>setShowPass(prev=>!prev)} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded">
-              {showPass ? <img src={assets.eyecross} alt="Hide" className="w-5 h-5" /> : <img src={assets.eye} alt="Show" className="w-5 h-5" />}
+          <div className="p-7 sm:p-8 pl-8 sm:pl-9 space-y-5">
+            {/* Toggle */}
+            <div className="grid grid-cols-2 p-1 rounded-xl bg-gray-100 text-gray-600">
+              <button
+                type="button"
+                onClick={() => setState('Sign Up')}
+                className={`${state === 'Sign Up' ? 'bg-white text-gray-900 shadow-sm' : ''} rounded-lg py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer`}
+              >
+                Sign Up
+              </button>
+              <button
+                type="button"
+                onClick={() => setState('Login')}
+                className={`${state === 'Login' ? 'bg-white text-gray-900 shadow-sm' : ''} rounded-lg py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer`}
+              >
+                Login
+              </button>
+            </div>
+
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {state === 'Sign Up' ? 'Create Account' : 'Welcome Back'}
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Please {state === 'Sign Up' ? 'sign up' : 'log in'} to book appointment
+              </p>
+            </div>
+
+            {state === 'Sign Up' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                  </div>
+                  <input
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/30 focus:border-sky-400 transition-all"
+                    type="text"
+                    placeholder="Enter your name"
+                    onChange={(e) => setName(e.target.value)}
+                    value={name}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Mobile Number</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                  </svg>
+                </div>
+                <input
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/30 focus:border-sky-400 transition-all"
+                  type="tel"
+                  placeholder="Enter your mobile number"
+                  onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0, 10))}
+                  value={phone}
+                  pattern="^[0-9]{10}$"
+                  maxLength="10"
+                  required
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-1.5 ml-1">Enter 10-digit mobile number</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                  </svg>
+                </div>
+                <input
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/30 focus:border-sky-400 transition-all"
+                  type={showPass ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
+                  required
+                />
+                <button type="button" onClick={() => setShowPass(prev => !prev)} className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                  {showPass ? <img src={assets.eyecross} alt="Hide" className="w-4.5 h-4.5 opacity-50" /> : <img src={assets.eye} alt="Show" className="w-4.5 h-4.5 opacity-50" />}
+                </button>
+              </div>
+            </div>
+
+            <button type='submit' className="w-full py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#3f5261] to-[#2c3e50] hover:from-[#2c3e50] hover:to-[#1a252f] shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer">
+              {state === 'Sign Up' ? 'Create Account' : 'Login'}
             </button>
+
+            {state === 'Login' && (
+              <button
+                type="button"
+                onClick={handleResetPassword}
+                disabled={isResetting || !phone || phone.length !== 10}
+                className="w-full py-2.5 rounded-xl text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {isResetting ? 'Loading...' : 'Reset Password'}
+              </button>
+            )}
+
+            <p className="text-sm text-center text-gray-500">
+              {state === 'Sign Up' ? 'Already have an account? ' : 'Create a new account? '}
+              <span
+                onClick={() => setState(state === 'Sign Up' ? 'Login' : 'Sign Up')}
+                className="text-sky-600 font-medium cursor-pointer hover:text-sky-700 transition-colors"
+              >
+                {state === 'Sign Up' ? 'Login Here' : 'Click here'}
+              </span>
+            </p>
           </div>
         </div>
-        <button type='submit' className="bg-primary text-white w-full py-2.5 rounded-lg text-base font-medium shadow hover:bg-[#4a5bff] transition-colors duration-300">
-          {state === 'Sign Up' ? 'Create Account' : 'Login'}
-        </button>
-        
-        {/* Reset Password Button - Only show on Login state */}
-        {state === 'Login' && (
-          <button
-            type="button"
-            onClick={handleResetPassword}
-            disabled={isResetting || !phone || phone.length !== 10}
-            className="w-full py-2.5 rounded-lg text-base font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isResetting ? 'Loading...' : 'Reset Password'}
-          </button>
-        )}
-        {state === 'Sign Up' ? (
-          <p className="text-sm sm:text-base text-center">
-            Already have an account?{' '}
-            <span
-              onClick={() => setState('Login')}
-              className="text-primary underline cursor-pointer hover:text-[#4a5bff] transition-colors duration-300"
-            >
-              Login Here
-            </span>
-          </p>
-        ) : (
-          <p className="text-sm sm:text-base text-center">
-            Create a new account?{' '}
-            <span
-              onClick={() => setState('Sign Up')}
-              className="text-primary underline cursor-pointer hover:text-[#4a5bff] transition-colors duration-300"
-            >
-              Click here
-            </span>
-          </p>
-        )}
-        {/* Profile chooser modal */}
-        {showProfileChooser && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-[90%] max-w-md shadow-xl">
-              <h3 className="text-lg font-semibold mb-3">Select your profile</h3>
-              <p className="text-sm text-zinc-600 mb-4">Multiple profiles found for +91 {phone}. Choose one to continue.</p>
-              <div className="space-y-2 max-h-60 overflow-auto">
-                {profileChoices.map((p) => (
-                  <button key={p.id} onClick={async () => {
-                    try {
-                      const resp = await axios.post(backendUrl + '/api/user/login', { phone, password, name: p.name })
-                      if (resp.data?.success && resp.data?.token) {
-                        localStorage.setItem('token', resp.data.token)
-                        setToken(resp.data.token)
-                        setShowProfileChooser(false)
-                      } else if (resp.data?.message) {
-                        toast.error(resp.data.message)
-                      }
-                    } catch (e) { toast.error(e.message) }
-                  }} className="w-full text-left px-4 py-2 rounded border hover:bg-gray-50">
-                    {p.name}
+      </form>
+
+      {/* Profile chooser modal */}
+      {showProfileChooser && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-2xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Select your profile</h3>
+            <p className="text-sm text-gray-500 mb-5">Multiple profiles found for +91 {phone}. Choose one to continue.</p>
+            <div className="space-y-2 max-h-60 overflow-auto">
+              {profileChoices.map((p) => (
+                <button key={p.id} onClick={async () => {
+                  try {
+                    const resp = await axios.post(backendUrl + '/api/user/login', { phone, password, name: p.name })
+                    if (resp.data?.success && resp.data?.token) {
+                      localStorage.setItem('token', resp.data.token)
+                      setToken(resp.data.token)
+                      setShowProfileChooser(false)
+                    } else if (resp.data?.message) {
+                      toast.error(resp.data.message)
+                    }
+                  } catch (e) { toast.error(e.message) }
+                }} className="w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:bg-sky-50 hover:border-sky-300 transition-all text-sm font-medium cursor-pointer">
+                  {p.name}
+                </button>
+              ))}
+            </div>
+            <div className="mt-5 text-right">
+              <button type="button" onClick={() => setShowProfileChooser(false)} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 cursor-pointer">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {showResetPassword && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-[90%] max-w-md shadow-2xl max-h-[80vh] overflow-y-auto">
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Reset Password</h3>
+            <p className="text-sm text-gray-500 mb-5">Select the profile for which you want to reset the password.</p>
+
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Select Profile:</label>
+              <div className="space-y-2 max-h-40 overflow-auto">
+                {resetProfiles.map((profile) => (
+                  <button
+                    key={profile.id}
+                    onClick={() => setSelectedResetProfile(profile)}
+                    className={`w-full text-left px-4 py-3 rounded-xl border transition-all text-sm font-medium cursor-pointer ${selectedResetProfile?.id === profile.id
+                        ? 'border-sky-400 bg-sky-50 text-sky-700'
+                        : 'border-gray-200 hover:bg-gray-50'
+                      }`}
+                  >
+                    {profile.name}
                   </button>
                 ))}
               </div>
-              <div className="mt-4 text-right">
-                <button type="button" onClick={() => setShowProfileChooser(false)} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">Cancel</button>
-              </div>
             </div>
-          </div>
-        )}
-        
-        {/* Reset Password Modal */}
-        {showResetPassword && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-[90%] max-w-md shadow-xl max-h-[80vh] overflow-y-auto">
-              <h3 className="text-lg font-semibold mb-3">Reset Password</h3>
-              <p className="text-sm text-zinc-600 mb-4">Select the profile for which you want to reset the password.</p>
-              
-              {/* Profile Selection */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Select Profile:</label>
-                <div className="space-y-2 max-h-40 overflow-auto">
-                  {resetProfiles.map((profile) => (
+
+            {selectedResetProfile && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">New Password:</label>
+                  <div className="relative">
+                    <input
+                      type={showNewPass ? 'text' : 'password'}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter new password (min 8 characters)"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/30 focus:border-sky-400 transition-all"
+                      minLength="8"
+                      required
+                    />
                     <button
-                      key={profile.id}
-                      onClick={() => setSelectedResetProfile(profile)}
-                      className={`w-full text-left px-3 py-2 rounded border transition-colors ${
-                        selectedResetProfile?.id === profile.id
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-gray-300 hover:bg-gray-50'
-                      }`}
+                      type="button"
+                      onClick={() => setShowNewPass(!showNewPass)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-gray-100 cursor-pointer"
                     >
-                      {profile.name}
+                      {showNewPass ? <img src={assets.eyecross} alt="Hide" className="w-4.5 h-4.5 opacity-50" /> : <img src={assets.eye} alt="Show" className="w-4.5 h-4.5 opacity-50" />}
                     </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* New Password Input */}
-              {selectedResetProfile && (
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">New Password:</label>
-                    <div className="relative">
-                      <input
-                        type={showNewPass ? 'text' : 'password'}
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Enter new password (min 8 characters)"
-                        className="w-full border border-gray-300 rounded px-3 py-2 pr-10"
-                        minLength="8"
-                        required
-                      />
-                                              <button
-                          type="button"
-                          onClick={() => setShowNewPass(!showNewPass)}
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-200 rounded"
-                        >
-                          {showNewPass ? <img src={assets.eyecross} alt="Hide" className="w-5 h-5" /> : <img src={assets.eye} alt="Show" className="w-5 h-5" />}
-                        </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password:</label>
-                    <div className="relative">
-                      <input
-                        type={showConfirmPass ? 'text' : 'password'}
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Confirm new password"
-                        className="w-full border border-gray-300 rounded px-3 py-2 pr-10"
-                        minLength="8"
-                        required
-                      />
-                                              <button
-                          type="button"
-                          onClick={() => setShowConfirmPass(!showConfirmPass)}
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-200 rounded"
-                        >
-                          {showConfirmPass ? <img src={assets.eyecross} alt="Hide" className="w-5 h-5" /> : <img src={assets.eye} alt="Show" className="w-5 h-5" />}
-                        </button>
-                    </div>
                   </div>
                 </div>
-              )}
 
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-2 mt-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowResetPassword(false)
-                    setNewPassword('')
-                    setConfirmPassword('')
-                    setSelectedResetProfile(null)
-                    setResetProfiles([])
-                  }}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handlePasswordReset}
-                  disabled={!selectedResetProfile || !newPassword || !confirmPassword || newPassword !== confirmPassword || isResetting}
-                  className="px-4 py-2 text-sm bg-primary text-white rounded hover:bg-[#4a5bff] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isResetting ? 'Resetting...' : 'Reset Password'}
-                </button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password:</label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPass ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirm new password"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400/30 focus:border-sky-400 transition-all"
+                      minLength="8"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPass(!showConfirmPass)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-gray-100 cursor-pointer"
+                    >
+                      {showConfirmPass ? <img src={assets.eyecross} alt="Hide" className="w-4.5 h-4.5 opacity-50" /> : <img src={assets.eye} alt="Show" className="w-4.5 h-4.5 opacity-50" />}
+                    </button>
+                  </div>
+                </div>
               </div>
+            )}
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowResetPassword(false)
+                  setNewPassword('')
+                  setConfirmPassword('')
+                  setSelectedResetProfile(null)
+                  setResetProfiles([])
+                }}
+                className="px-5 py-2.5 text-sm font-medium border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handlePasswordReset}
+                disabled={!selectedResetProfile || !newPassword || !confirmPassword || newPassword !== confirmPassword || isResetting}
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-[#3f5261] to-[#2c3e50] rounded-xl hover:from-[#2c3e50] hover:to-[#1a252f] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+              >
+                {isResetting ? 'Resetting...' : 'Reset Password'}
+              </button>
             </div>
           </div>
-        )}
-      </div>
-    </form>
+        </div>
+      )}
+    </div>
   );
 };
 
